@@ -24,6 +24,7 @@ public:
 //protected:
 	void update();
 	void BufferData();
+	//void ClearData();
 
 	GLuint arrayObject;
 	GLuint bufferObject[MAX_BUFFER];

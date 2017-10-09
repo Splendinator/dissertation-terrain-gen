@@ -81,6 +81,7 @@ Mesh * Mesh::GenerateQuad() {
 
 
 void Mesh::BufferData() {
+	glDeleteBuffers(MAX_BUFFER, bufferObject);
 	glBindVertexArray(arrayObject);
 	glGenBuffers(1, &bufferObject[VERTEX_BUFFER]);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferObject[VERTEX_BUFFER]);
@@ -112,6 +113,7 @@ void Mesh::BufferData() {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLuint),
 			indices, GL_STATIC_DRAW);
 	}
+	
 	glBindVertexArray(0);
 }
 
@@ -133,5 +135,5 @@ void Mesh::Draw() {
 }
 
 void Mesh::update() {
-	
+	//Draw();
 }
