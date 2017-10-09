@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Prog_TerrainGenV1", "Prog_TerrainGenV1", "{26FF1E94-61DD-4E24-A071-50FA11CAC038}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nclgl", "..\nclgl\nclgl.vcxproj", "{98D6B51B-CB0A-4389-ADC6-24082B967C3F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shaders", "Shaders", "{13509D0D-B73F-4667-A9B7-2E04AB144110}"
+	ProjectSection(SolutionItems) = preProject
+		..\Shaders\debugFragment.glsl = ..\Shaders\debugFragment.glsl
+		..\Shaders\debugVertex.glsl = ..\Shaders\debugVertex.glsl
+		..\Shaders\skeletonVertex Commented.glsl = ..\Shaders\skeletonVertex Commented.glsl
+		..\Shaders\skeletonVertex.glsl = ..\Shaders\skeletonVertex.glsl
+		..\Shaders\TexturedFragment.glsl = ..\Shaders\TexturedFragment.glsl
+		..\Shaders\TexturedVertex.glsl = ..\Shaders\TexturedVertex.glsl
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TerrainGenV1", "TerrainGenV1\TerrainGenV1.vcxproj", "{355E0D77-213D-4752-8414-AD356BDF15EC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Debug|Win32.Build.0 = Debug|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Release|Win32.ActiveCfg = Release|Win32
+		{98D6B51B-CB0A-4389-ADC6-24082B967C3F}.Release|Win32.Build.0 = Release|Win32
+		{355E0D77-213D-4752-8414-AD356BDF15EC}.Debug|Win32.ActiveCfg = Debug|Win32
+		{355E0D77-213D-4752-8414-AD356BDF15EC}.Debug|Win32.Build.0 = Debug|Win32
+		{355E0D77-213D-4752-8414-AD356BDF15EC}.Release|Win32.ActiveCfg = Release|Win32
+		{355E0D77-213D-4752-8414-AD356BDF15EC}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{355E0D77-213D-4752-8414-AD356BDF15EC} = {26FF1E94-61DD-4E24-A071-50FA11CAC038}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6C6FFCE6-6239-4F33-AE4F-5F2F3EBA19C6}
+	EndGlobalSection
+EndGlobal
