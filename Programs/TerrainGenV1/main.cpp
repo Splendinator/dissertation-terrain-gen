@@ -1,5 +1,6 @@
 #include "../../nclgl/window.h"
 #include "Renderer.h"
+#include <random>
 
 #pragma comment(lib, "nclgl.lib")
 
@@ -34,14 +35,24 @@ int main() {
 
 		if (Window::GetMouse()->ButtonDown(MOUSE_LEFT)) {
 			renderer.heightMap->makeHill(Vector2(renderer.camera->GetPosition().x / RAW_WIDTH / HEIGHTMAP_X, renderer.camera->GetPosition().z / RAW_WIDTH / HEIGHTMAP_Z), dy, rad);
-			//cout << renderer.camera->GetPosition().x / RAW_WIDTH << " " << renderer.camera->GetPosition().z / RAW_WIDTH;
 		}
 		if (Window::GetMouse()->ButtonDown(MOUSE_RIGHT)) {
 			renderer.heightMap->makeHill(Vector2(renderer.camera->GetPosition().x / RAW_WIDTH / HEIGHTMAP_X, renderer.camera->GetPosition().z / RAW_WIDTH / HEIGHTMAP_Z), -dy, rad);
-			//cout << renderer.camera->GetPosition().x / RAW_WIDTH << " " << renderer.camera->GetPosition().z / RAW_WIDTH;
 		}
 		if (Window::GetKeyboard()->KeyDown(KEYBOARD_F)) {
 			renderer.heightMap->makeFlat();
+		}
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_R)) {
+
+			std::random_device(e);
+			std::uniform_real_distribution<float> rPos(0.0f, 1.0f);
+			std::uniform_real_distribution<float> rRad(50.0f, 90.0f);
+			std::uniform_real_distribution<float> rSize(-7.0f, 7.0f);
+
+			renderer.heightMap->makeFlat();
+			for (int i = 0; i < 400; i++) {
+				renderer.heightMap->makeHill(Vector2(rPos(e),rPos(e)),rSize(e),rRad(e));
+			}
 		}
 		if (Window::GetMouse()->GetWheelMovement() > 0){
 			rad += 0.4f;
@@ -55,6 +66,7 @@ int main() {
 			if (rad < 0) rad = 0;
 			if (dy < 0) dy = 0;
 		}
+
 
 	}
 	return 0;

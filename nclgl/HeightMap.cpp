@@ -53,12 +53,8 @@ HeightMap::HeightMap(std::string name) {
 }
 
 void HeightMap::makeHill(Vector2 pos, float dy, float rad) {
-	bool neg = false;
 	int x, y,tx = RAW_WIDTH*pos.x,ty=RAW_WIDTH*pos.y;
 	float dist;
-	
-
-
 
 	for (x = 0; x < RAW_WIDTH; x++) {
 		for (y = 0; y < RAW_WIDTH; y++) {
@@ -69,7 +65,7 @@ void HeightMap::makeHill(Vector2 pos, float dy, float rad) {
 			}
 		}
 	}
-	BufferData();
+	//update();
 }
 
 void HeightMap::makeFlat() {
@@ -78,5 +74,5 @@ void HeightMap::makeFlat() {
 			vertices[x*RAW_WIDTH + y] = Vector3(vertices[x*RAW_WIDTH + y].x, 0.0f, vertices[x*RAW_WIDTH + y].z);
 		}
 	}
-	BufferData();
+	//update();
 }

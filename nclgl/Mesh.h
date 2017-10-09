@@ -21,7 +21,8 @@ public:
 
 
 
-protected:
+//protected:
+	void update();
 	void BufferData();
 
 	GLuint arrayObject;

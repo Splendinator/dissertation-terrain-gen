@@ -110,7 +110,7 @@ void Mesh::BufferData() {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
 			bufferObject[INDEX_BUFFER]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLuint),
-			indices, GL_DYNAMIC_DRAW);
+			indices, GL_STATIC_DRAW);
 	}
 	glBindVertexArray(0);
 }
@@ -130,4 +130,8 @@ void Mesh::Draw() {
 
 	glBindVertexArray(0);
 
+}
+
+void Mesh::update() {
+	
 }
