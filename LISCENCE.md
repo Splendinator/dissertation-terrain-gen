@@ -1,0 +1,1 @@
+Don't use my software. You have no rights. I reserve all rights.
