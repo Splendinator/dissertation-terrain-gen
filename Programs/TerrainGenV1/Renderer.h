@@ -5,9 +5,13 @@
 #include "../../nclgl/HeightMap.h"
 #include "Chunk.h"
 
+enum Direction {
+	NORTH, EAST, SOUTH, WEST
+};
+
 class Renderer : public OGLRenderer {
 private:
-	static const int MAX_CHUNKS = 9;	//The maximum ammount of chunks that will be rendered every frame. (9 means 3x3 grid around player)
+	static const int MAX_CHUNKS = 3;	//The maximum ammount of chunks that will be rendered every frame. (3 means 3x3 grid around player)
 
 public :
 	Renderer ( Window & parent );
@@ -16,8 +20,9 @@ public :
 	 virtual void RenderScene ();
 	 virtual void UpdateScene ( float msec );
 	
-	 Chunk * chunk[MAX_CHUNKS];
+	 Chunk * chunk[MAX_CHUNKS*MAX_CHUNKS];
 	 Chunk * getActiveChunk();			//Get chunk that camera is above
 
 	 Camera * camera ;
+	 void shiftChunks(Direction dir);
  };

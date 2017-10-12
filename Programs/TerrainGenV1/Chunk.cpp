@@ -5,11 +5,13 @@
 Chunk::Chunk()
 {
 	Chunk(Vector2(0.0f,0.0f));
+	
 }
 
 Chunk::Chunk(Vector2 pos) {
 	h = new HeightMap(pos);
 	wc = pos;
+	prevId = 0;
 
 	h->SetTexture(SOIL_load_OGL_texture(
 		"../../Textures/BarrenReds.jpg",
@@ -48,19 +50,23 @@ void Chunk::makeHill(Vector2 pos, float dy, float rad, UINT id) {
 
 	if (minX < 0) {
 		minX = 0;
-		w->makeHill(Vector2(pos.x + 1.0f - 1.0f/(RAW_WIDTH), pos.y), dy, rad,id);
+		if (w != NULL)
+		w->makeHill(Vector2(pos.x + (1.0f - 1.0f/(RAW_WIDTH) ), pos.y), dy, rad,id); // TODO: Figure out why we need "-1.0f/(RAW_WIDTH)" here but not for east?
 	}
 	if (minY < 0) {
 		minY = 0;
-		s->makeHill(Vector2(pos.x, pos.y + 1.0f - 1.0f/(RAW_HEIGHT)), dy, rad,id);
+		if (n != NULL)
+		n->makeHill(Vector2(pos.x, pos.y + (1.0f - 1.0f/(RAW_HEIGHT))), dy, rad,id);
 	}
 	if (maxX > RAW_WIDTH) {
 		maxX = RAW_WIDTH;
-
+		if(e!=NULL)
+		e->makeHill(Vector2(pos.x - 1.0f, pos.y), dy, rad, id);
 	}
 	if (maxY > RAW_HEIGHT) {
 		maxY = RAW_HEIGHT;
-
+		if(s!=NULL)
+		s->makeHill(Vector2(pos.x, pos.y - 1.0f), dy, rad, id);
 	}
 
 	for (x = minX; x < maxX; x++) {

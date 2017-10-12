@@ -1,6 +1,7 @@
 #include "../../nclgl/window.h"
 #include "Renderer.h"
 #include <random>
+#include <iostream>
 
 #pragma comment(lib, "nclgl.lib")
 
@@ -8,7 +9,8 @@ int main() {
 
 	UINT id = 0;
 	float rad = 30.0f, dy = 0.5f;
-	Chunk *active;
+	Chunk *prev = NULL;
+	Chunk *active = NULL;
 
 	Window w("Index Buffers!", 1600,900,false);
 	if(!w.HasInitialised()) {
@@ -29,12 +31,28 @@ int main() {
 	w.LockMouseToWindow(true);
 	w.ShowOSPointer(false);
 
-	renderer.camera->SetPosition(Vector3(HEIGHTMAP_X / 2 * RAW_WIDTH, HEIGHTMAP_Y*RAW_HEIGHT, HEIGHTMAP_Z / 2 * RAW_WIDTH));
+	renderer.camera->SetPosition(Vector3((HEIGHTMAP_X / 2 * RAW_WIDTH )+ HEIGHTMAP_X*RAW_WIDTH, HEIGHTMAP_Y*RAW_HEIGHT, (HEIGHTMAP_Z / 2 * RAW_WIDTH) + HEIGHTMAP_Z*RAW_HEIGHT));
 
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
 		renderer.RenderScene();
+		prev = active;
 		active = renderer.getActiveChunk();
+		if (prev != active && prev != NULL && active != NULL) {
+			if (active == prev->n) {
+				renderer.shiftChunks(NORTH);
+				std::cout << "You have changed chunk NORTH" << std::endl;
+			}
+			else if (active == prev->e) {
+				std::cout << "You have changed chunk EAST" << std::endl;
+			}
+			else if (active == prev->s) {
+				std::cout << "You have changed chunk SOUTH" << std::endl;
+			}
+			else if (active == prev->w) {
+				std::cout << "You have changed chunk WEST" << std::endl;
+			}
+		}
 
 		if (Window::GetMouse()->ButtonDown(MOUSE_LEFT)) {
 			active->makeHill(Vector2(fmod((renderer.camera->GetPosition().x / RAW_WIDTH / HEIGHTMAP_X),1.0f),fmod((renderer.camera->GetPosition().z / RAW_WIDTH / HEIGHTMAP_Z),1.0f)), dy, rad,++id);	
