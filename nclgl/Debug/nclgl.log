@@ -1,10 +1,1 @@
-﻿  Window.cpp
-  Shader.cpp
-  OGLRenderer.cpp
-  Mesh.cpp
-  HeightMap.cpp
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\nclgl\heightmap.cpp(56): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\nclgl\heightmap.cpp(61): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-  Camera.cpp
-  Generating Code...
-  nclgl.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\nclgl.lib
+﻿  nclgl.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\nclgl.lib
