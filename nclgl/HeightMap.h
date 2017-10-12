@@ -17,8 +17,8 @@
 
 class HeightMap : public Mesh {
 public:
-	HeightMap(std::string name);
+	HeightMap(Vector2 pos);
 	~HeightMap(void) {};
-	void makeHill(Vector2 pos, float dy, float rad);
+	//void makeHill(Vector2 pos, float dy, float rad);
 	void makeFlat();
 };

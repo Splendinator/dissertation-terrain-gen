@@ -1,8 +1,27 @@
-# include "Renderer.h"
+#include "Renderer.h"
+#include "Chunk.h"
 #include <iostream>
 
+
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
-	heightMap =			new HeightMap("../../Textures/terrain.raw");
+
+	for (int i = 0; i < sqrt(MAX_CHUNKS); i++) {
+		for (int j = 0; j < sqrt(MAX_CHUNKS); j++) {
+			chunk[i*3+j] = new Chunk(Vector2(i*(CHUNK_SIZE),j*(CHUNK_SIZE)));
+		}
+	}
+
+
+	for (int i = 0; i < sqrt(MAX_CHUNKS); i++) {
+		for (int j = 0; j < sqrt(MAX_CHUNKS); j++) {
+			if (i > 0)						chunk[i * 3 + j]->w = chunk[(i - 1) * 3 + j];
+			if (j > 0)						chunk[i * 3 + j]->s = chunk[i * 3 + (j-1)];
+			if (i < sqrt(MAX_CHUNKS)-1)		chunk[i * 3 + j]->e = chunk[(i + 1) * 3 + j];
+			if (j < sqrt(MAX_CHUNKS)-1)		chunk[i * 3 + j]->n = chunk[i * 3 + (j + 1)];
+
+		}
+	}
+
 	camera =			new Camera();
 	
 	currentShader =		new Shader("../../Shaders/TexturedVertex.glsl",
@@ -11,15 +30,6 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	if (!currentShader->LinkProgram()) {
 		return;
 	}
-
-	heightMap->SetTexture(SOIL_load_OGL_texture(
-					"../../Textures/BarrenReds.jpg",
-					SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
-
-	if (!heightMap->GetTexture()) {
-		return;
-	}
-	SetTextureRepeating(heightMap->GetTexture(), true);
 
 
 	projMatrix = Matrix4::Perspective(1.0f, 10000.0f,
@@ -35,7 +45,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 }
 
 Renderer ::~Renderer(void) {
-	delete heightMap;
+	delete chunk;
 	delete camera;
 }
 
@@ -53,8 +63,27 @@ void Renderer::RenderScene() {
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
 		"diffuseTex"), 0);
 
-	heightMap->Draw();
+	for (int i = 0; i < MAX_CHUNKS; i++) {
+		chunk[i]->Draw();
+	}
+	
 
 	glUseProgram(0);
 	SwapBuffers();
+}
+
+Chunk * Renderer::getActiveChunk() {
+	float x = camera->GetPosition().x/CHUNK_SIZE, y = camera->GetPosition().z / CHUNK_SIZE;
+	float tx,ty,temp, dist = INFINITE;
+	int ret = 0;
+
+	for (int i = 0; i < MAX_CHUNKS; i++) {
+		tx = (chunk[i]->getPosition().x + CHUNK_SIZE/2) / CHUNK_SIZE;
+		ty = (chunk[i]->getPosition().y + CHUNK_SIZE/2) / CHUNK_SIZE;
+		temp = sqrt((x - tx)*(x - tx) + (y - ty)*(y - ty));
+		if (dist > temp) {dist = temp; ret = i;}
+	}
+	//DrawDebugLine(DEBUGDRAW_ORTHO, camera->GetPosition(), Vector3(chunk[ret]->getPosition().x + CHUNK_SIZE / 2, 0.0f, chunk[ret]->getPosition().y + CHUNK_SIZE / 2));
+	//cout << tx << " " << ty << " " << x << " " << y << " " << ret << " " << dist << " " << temp << endl;
+	return chunk[ret]; 
 }
