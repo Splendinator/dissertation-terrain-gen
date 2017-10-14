@@ -31,8 +31,6 @@ int main() {
 	w.LockMouseToWindow(true);
 	w.ShowOSPointer(false);
 
-	renderer.camera->SetPosition(Vector3((HEIGHTMAP_X / 2 * RAW_WIDTH )+ HEIGHTMAP_X*RAW_WIDTH, HEIGHTMAP_Y*RAW_HEIGHT, (HEIGHTMAP_Z / 2 * RAW_WIDTH) + HEIGHTMAP_Z*RAW_HEIGHT));
-
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
 		renderer.RenderScene();

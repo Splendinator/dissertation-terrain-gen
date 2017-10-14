@@ -3,15 +3,21 @@
 
 #define CHUNK_SIZE (RAW_HEIGHT - 1) * HEIGHTMAP_X
 
+enum Direction {
+	NORTH, EAST, SOUTH, WEST
+};
+
 class Chunk
 {
 private:
 	
-	HeightMap *h;			//Heightmap that will be rendered on screen.
+
 	Vector2 wc;				//X and Z world co-ordinates of chunk. 
 	int prevId = 0;
 
 public:
+
+	HeightMap *h;			//Heightmap that will be rendered on screen.
 	Chunk *n = NULL, *e = NULL, *s = NULL, *w = NULL;	//Pointers to the chunk to the north,east,south,west.
 	
 
@@ -30,5 +36,6 @@ public:
 
 	void stitch(UINT sKey);
 
+	void shift(Direction dir);
 };
 

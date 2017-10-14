@@ -83,8 +83,6 @@ void Chunk::makeHill(Vector2 pos, float dy, float rad, UINT id) {
 
 }
 
-void Chunk::stitch(UINT sKey) {
-	
-}
+
 
 
