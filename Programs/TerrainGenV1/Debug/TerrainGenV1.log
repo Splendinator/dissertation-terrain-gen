@@ -1,8 +1,19 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (TerrainGen.vcxproj, Tutorial 08 - Index Buffers.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  main.cpp
   Renderer.cpp
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(31): warning C4244: 'argument': conversion from 'const int' to 'const float', possible loss of data
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(54): warning C4156: deletion of an array expression without using the array form of 'delete'; array form substituted
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(54): warning C4154: deletion of an array expression; conversion to pointer supplied
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(113): warning C4101: 'offset': unreferenced local variable
+  Chunk.cpp
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\chunk.cpp(47): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\chunk.cpp(48): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\chunk.cpp(74): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+  Generating Code...
+  LINK : C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.exe not found or not built by the last incremental link; performing full link
+Renderer.obj : warning LNK4049: locally defined symbol ___glewGetUniformLocation imported
+Renderer.obj : warning LNK4049: locally defined symbol ___glewUniform1i imported
+Renderer.obj : warning LNK4049: locally defined symbol ___glewUseProgram imported
+glew32.lib(glew.obj) : warning LNK4099: PDB 'vc120.pdb' was not found with 'glew32.lib(glew.obj)' or at 'C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\vc120.pdb'; linking object as if no debug info
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.exe
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.pdb (Partial PDB)
