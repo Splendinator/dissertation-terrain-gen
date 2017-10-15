@@ -1,7 +1,10 @@
 #include "Renderer.h"
 #include "Chunk.h"
 #include <iostream>
+#include <random>
 
+
+UINT id = 0;
 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
@@ -11,6 +14,16 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 		}
 	}
 	setPointers();
+	for (int i = 0; i < MAX_CHUNKS; i++) {
+		for (int j = 0; j < MAX_CHUNKS; j++) {
+			cout << "[" << i << "][" << j << "]" << endl;
+			if (chunk[i][j]->n != NULL) cout << "\t N" << endl;
+			if (chunk[i][j]->e != NULL) cout << "\t E" << endl;
+			if (chunk[i][j]->s != NULL) cout << "\t S" << endl;
+			if (chunk[i][j]->w != NULL) cout << "\t W" << endl;
+
+		}
+	}
 
 	
 
@@ -44,10 +57,10 @@ Renderer ::~Renderer(void) {
 
 void Renderer::UpdateScene(float msec) {
 	camera->UpdateCamera(msec);
-	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));				shiftChunks(NORTH); }
-	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		shiftChunks(SOUTH); }
-	if (camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));				shiftChunks(EAST); }
-	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));		shiftChunks(WEST); }
+	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));					shiftChunks(WEST);		}
+	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		shiftChunks(EAST);		}
+	if (camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));					shiftChunks(NORTH);		}
+	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));	shiftChunks(SOUTH);		}
 	viewMatrix = camera->BuildViewMatrix();
 }
 
@@ -98,26 +111,38 @@ Chunk * Renderer::getActiveChunk() {
 //TODO: Optimise this?
 void Renderer::shiftChunks(Direction dir) {
 	int offset;
+	//********* random delete this *************
+	std::random_device(e);
+	std::uniform_real_distribution<float> rPos(0.0f, 1.0f);
+	std::uniform_real_distribution<float> rRad(100.0f, 150.0f);
+	std::uniform_real_distribution<float> rSize(10.0f, 14.0f);
+	//********* random delete this *************
 	switch(dir){
-		case(NORTH): {
+		case(WEST): {
 			for (int i = MAX_CHUNKS-1; i >= 1 ; i--) {
 				for (int j = 0; j < MAX_CHUNKS; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
 						chunk[i][j]->h->vertices[k].y =  chunk[i - 1][j]->h->vertices[k].y;
 					}
+
 					chunk[i][j]->h->BufferData();
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-					chunk[0][i]->h->vertices[k].y = 0.0f;
+				
+				
+				/*TEMP RANDOM HILLS*/
+				for (int j = 0; j < 6; j++) {
+					chunk[0][i]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
 				}
+				/*TEMP RANDOM HILLS*/
+
 				chunk[0][i]->h->BufferData();
 			}
 			break;
 		}
 		 
-		case(SOUTH): {
+		case(EAST): {
 			for (int i = 0; i < MAX_CHUNKS - 1; i++) {
 				for (int j = 0; j < MAX_CHUNKS; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
@@ -127,15 +152,13 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-					chunk[2][i]->h->vertices[k].y = 0.0f;
-				}
+				chunk[MAX_CHUNKS-1][i]->h->makeFlat();
 				chunk[MAX_CHUNKS-1][i]->h->BufferData();
 			}
 			break;
 		}
 
-		case(EAST): {
+		case(NORTH): {
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				for (int j = MAX_CHUNKS-1; j >= 1; j--) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
@@ -145,15 +168,13 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-					chunk[i][0]->h->vertices[k].y = 0.0f;
-				}
+				chunk[i][0]->h->makeFlat();
 				chunk[i][0]->h->BufferData();
 			}
 			break;
 		}
 
-		case(WEST): {
+		case(SOUTH): {
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				for (int j = 0; j < MAX_CHUNKS - 1; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
@@ -163,9 +184,7 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-					chunk[i][MAX_CHUNKS - 1]->h->vertices[k].y = 0.0f;
-				}
+				chunk[i][MAX_CHUNKS - 1]->h->makeFlat();
 				chunk[i][MAX_CHUNKS - 1]->h->BufferData();
 			}
 			break;
@@ -179,8 +198,8 @@ void Renderer::setPointers() {
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
 			if (i > 0) chunk[i][j]->w = chunk[i - 1][j];
-			if (j > 0) chunk[i][j]->n = chunk[i][j - 1];
 			if (i < MAX_CHUNKS - 1) chunk[i][j]->e = chunk[i + 1][j];
+			if (j > 0) chunk[i][j]->n = chunk[i][j - 1];
 			if (j < MAX_CHUNKS - 1) chunk[i][j]->s = chunk[i][j + 1];
 		}
 	}

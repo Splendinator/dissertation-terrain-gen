@@ -7,6 +7,9 @@
 
 int main() {
 
+	int tx = 0;
+	int ty = 3;
+
 	UINT id = 0;
 	float rad = 30.0f, dy = 0.5f;
 	Chunk *prev = NULL;
@@ -58,10 +61,10 @@ int main() {
 		if (Window::GetMouse()->ButtonDown(MOUSE_RIGHT)) {
 			active->makeHill(Vector2(fmod((renderer.camera->GetPosition().x / RAW_WIDTH / HEIGHTMAP_X), 1.0f), fmod((renderer.camera->GetPosition().z / RAW_WIDTH / HEIGHTMAP_Z), 1.0f)), -dy, rad,++id);
 		}
-		//if (Window::GetKeyboard()->KeyDown(KEYBOARD_F)) {
-		//	renderer.heightMap->makeFlat();
-		//	renderer.heightMap->BufferData();
-		//}
+		if (Window::GetKeyboard()->KeyDown(KEYBOARD_F)) {
+			renderer.chunk[tx][ty]->makeHill(Vector2(0.5f, 0.5f), 100.0f, 200.0f, ++id);
+			renderer.chunk[tx][ty]->h->BufferData();
+		}
 
 		//if (Window::GetKeyboard()->KeyDown(KEYBOARD_1)) {	//Random Mountains
 
