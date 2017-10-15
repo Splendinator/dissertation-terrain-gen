@@ -38,7 +38,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	}
 
 
-	projMatrix = Matrix4::Perspective(1.0f, 10000.0f,
+	projMatrix = Matrix4::Perspective(1.0f, 1000.0f,
 		(float)width / (float)height, 55.0f);
 
 	glEnable(GL_DEPTH_TEST);
@@ -114,8 +114,9 @@ void Renderer::shiftChunks(Direction dir) {
 	//********* random delete this *************
 	std::random_device(e);
 	std::uniform_real_distribution<float> rPos(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rRad(100.0f, 150.0f);
-	std::uniform_real_distribution<float> rSize(10.0f, 14.0f);
+	std::uniform_real_distribution<float> rRad(60.0f, 90.0f);
+	std::uniform_real_distribution<float> rSize(-6.0f, 6.0f);
+	int ammount = 30;
 	//********* random delete this *************
 	switch(dir){
 		case(WEST): {
@@ -125,19 +126,17 @@ void Renderer::shiftChunks(Direction dir) {
 						chunk[i][j]->h->vertices[k].y =  chunk[i - 1][j]->h->vertices[k].y;
 					}
 
-					chunk[i][j]->h->BufferData();
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				
-				
+				chunk[0][i]->h->makeFlat();
+			}
+			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
 				/*TEMP RANDOM HILLS*/
-				for (int j = 0; j < 6; j++) {
-					chunk[0][i]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
+				for (int j = 0; j < ammount; j++) {
+					chunk[1][i]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
 				}
 				/*TEMP RANDOM HILLS*/
-
-				chunk[0][i]->h->BufferData();
 			}
 			break;
 		}
@@ -148,12 +147,17 @@ void Renderer::shiftChunks(Direction dir) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
 						chunk[i][j]->h->vertices[k].y = chunk[i + 1][j]->h->vertices[k].y;
 					}
-					chunk[i][j]->h->BufferData();
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				chunk[MAX_CHUNKS-1][i]->h->makeFlat();
-				chunk[MAX_CHUNKS-1][i]->h->BufferData();
+			}
+			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
+				/*TEMP RANDOM HILLS*/
+				for (int j = 0; j < ammount; j++) {
+					chunk[MAX_CHUNKS-2][i]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
+				}
+				/*TEMP RANDOM HILLS*/
 			}
 			break;
 		}
@@ -164,12 +168,17 @@ void Renderer::shiftChunks(Direction dir) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
 						chunk[i][j]->h->vertices[k].y = chunk[i][j-1]->h->vertices[k].y;
 					}
-					chunk[i][j]->h->BufferData();
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				chunk[i][0]->h->makeFlat();
-				chunk[i][0]->h->BufferData();
+			}
+			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
+				/*TEMP RANDOM HILLS*/
+				for (int j = 0; j < ammount; j++) {
+					chunk[i][1]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
+				}
+				/*TEMP RANDOM HILLS*/
 			}
 			break;
 		}
@@ -179,17 +188,27 @@ void Renderer::shiftChunks(Direction dir) {
 				for (int j = 0; j < MAX_CHUNKS - 1; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
 						chunk[i][j]->h->vertices[k].y = chunk[i][j + 1]->h->vertices[k].y;
-					}
-					chunk[i][j]->h->BufferData();
+					};
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				chunk[i][MAX_CHUNKS - 1]->h->makeFlat();
-				chunk[i][MAX_CHUNKS - 1]->h->BufferData();
+			}
+			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
+				/*TEMP RANDOM HILLS*/
+				for (int j = 0; j < ammount; j++) {
+					chunk[i][MAX_CHUNKS-2]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
+				}
+				/*TEMP RANDOM HILLS*/
 			}
 			break;
 		}
 
+	}
+	for (int i = 0; i < MAX_CHUNKS; i++) {
+		for (int j = 0; j < MAX_CHUNKS; j++) {
+			chunk[i][j]->h->BufferData();
+		}
 	}
 }
 

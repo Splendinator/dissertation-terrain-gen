@@ -23,8 +23,8 @@ Chunk::Chunk(Vector2 pos) {
 	
 	//TODO: Figure out what the fuck to do with textures later when we want snow on top of mountains and that.
 	glBindTexture(GL_TEXTURE_2D, h->GetTexture());
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, false ? GL_REPEAT : GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, false ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
