@@ -61,7 +61,7 @@ protected:
 	Vector3 position;
 
 private:
-	const float HORIZONTAL_SPEED  = 0.04f;
-	const float  VERTICAL_SPEED = 0.04f;
-	const float  SPEED_BONUS = 3.0f;
+	const float HORIZONTAL_SPEED  = 0.2f;
+	const float  VERTICAL_SPEED = 0.2f;
+	const float  SPEED_BONUS = 4.0f;
 };

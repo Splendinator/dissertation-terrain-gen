@@ -1,7 +1,7 @@
-#include "Renderer.h"
-#include "Chunk.h"
 #include <iostream>
 #include <random>
+#include "Renderer.h"
+
 
 
 UINT id = 0;
@@ -14,21 +14,11 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 		}
 	}
 	setPointers();
-	for (int i = 0; i < MAX_CHUNKS; i++) {
-		for (int j = 0; j < MAX_CHUNKS; j++) {
-			cout << "[" << i << "][" << j << "]" << endl;
-			if (chunk[i][j]->n != NULL) cout << "\t N" << endl;
-			if (chunk[i][j]->e != NULL) cout << "\t E" << endl;
-			if (chunk[i][j]->s != NULL) cout << "\t S" << endl;
-			if (chunk[i][j]->w != NULL) cout << "\t W" << endl;
 
-		}
-	}
-
-	
+	generator = new Generator(-700.0f,700.0f,150.0f);
 
 	camera =			new Camera();
-	camera->SetPosition(Vector3((HEIGHTMAP_X / 2 * RAW_WIDTH) + (HEIGHTMAP_X*RAW_WIDTH)*MAX_CHUNKS/2, HEIGHTMAP_Y*RAW_HEIGHT, (HEIGHTMAP_Z / 2 * RAW_WIDTH) + (HEIGHTMAP_Z*RAW_HEIGHT))*MAX_CHUNKS / 2);
+	camera->SetPosition(Vector3(CHUNK_SIZE * MAX_CHUNKS / 2, HEIGHTMAP_Y*RAW_HEIGHT, CHUNK_SIZE * MAX_CHUNKS / 2));
 	
 	currentShader =		new Shader("../../Shaders/TexturedVertex.glsl",
 						"../../Shaders/TexturedFragment.glsl");
@@ -38,16 +28,16 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	}
 
 
-	projMatrix = Matrix4::Perspective(1.0f, 1000.0f,
+	projMatrix = Matrix4::Perspective(1.0f, 10000.0f,
 		(float)width / (float)height, 55.0f);
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-	
 
 	init = true;
+
 }
 
 Renderer ::~Renderer(void) {
@@ -57,10 +47,10 @@ Renderer ::~Renderer(void) {
 
 void Renderer::UpdateScene(float msec) {
 	camera->UpdateCamera(msec);
-	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));					shiftChunks(WEST);		}
-	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		shiftChunks(EAST);		}
-	if (camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));					shiftChunks(NORTH);		}
-	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));	shiftChunks(SOUTH);		}
+	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));					cameraPosX--;	shiftChunks(WEST);		}
+	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		cameraPosX++;	shiftChunks(EAST);		}
+	if (camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));					cameraPosY--;	shiftChunks(NORTH);		}
+	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));	cameraPosY++;	shiftChunks(SOUTH);		}
 	viewMatrix = camera->BuildViewMatrix();
 }
 
@@ -79,6 +69,7 @@ void Renderer::RenderScene() {
 		}
 	}
 	
+
 
 	glUseProgram(0);
 	SwapBuffers();
@@ -111,13 +102,6 @@ Chunk * Renderer::getActiveChunk() {
 //TODO: Optimise this?
 void Renderer::shiftChunks(Direction dir) {
 	int offset;
-	//********* random delete this *************
-	std::random_device(e);
-	std::uniform_real_distribution<float> rPos(0.0f, 1.0f);
-	std::uniform_real_distribution<float> rRad(60.0f, 90.0f);
-	std::uniform_real_distribution<float> rSize(-6.0f, 6.0f);
-	int ammount = 30;
-	//********* random delete this *************
 	switch(dir){
 		case(WEST): {
 			for (int i = MAX_CHUNKS-1; i >= 1 ; i--) {
@@ -129,14 +113,9 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				chunk[0][i]->h->makeFlat();
+				perlinGen(0,i);
 			}
 			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
-				/*TEMP RANDOM HILLS*/
-				for (int j = 0; j < ammount; j++) {
-					chunk[1][i]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
-				}
-				/*TEMP RANDOM HILLS*/
 			}
 			break;
 		}
@@ -150,14 +129,9 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				chunk[MAX_CHUNKS-1][i]->h->makeFlat();
+				perlinGen(MAX_CHUNKS - 1, i);
 			}
 			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
-				/*TEMP RANDOM HILLS*/
-				for (int j = 0; j < ammount; j++) {
-					chunk[MAX_CHUNKS-2][i]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
-				}
-				/*TEMP RANDOM HILLS*/
 			}
 			break;
 		}
@@ -171,14 +145,7 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				chunk[i][0]->h->makeFlat();
-			}
-			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
-				/*TEMP RANDOM HILLS*/
-				for (int j = 0; j < ammount; j++) {
-					chunk[i][1]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
-				}
-				/*TEMP RANDOM HILLS*/
+				perlinGen(i, 0);
 			}
 			break;
 		}
@@ -192,14 +159,7 @@ void Renderer::shiftChunks(Direction dir) {
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				chunk[i][MAX_CHUNKS - 1]->h->makeFlat();
-			}
-			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
-				/*TEMP RANDOM HILLS*/
-				for (int j = 0; j < ammount; j++) {
-					chunk[i][MAX_CHUNKS-2]->makeHill(Vector2(rPos(e), rPos(e)), rSize(e), rRad(e), ++id);
-				}
-				/*TEMP RANDOM HILLS*/
+				perlinGen(i,MAX_CHUNKS - 1);
 			}
 			break;
 		}
@@ -222,4 +182,16 @@ void Renderer::setPointers() {
 			if (j < MAX_CHUNKS - 1) chunk[i][j]->s = chunk[i][j + 1];
 		}
 	}
+}
+
+void Renderer::perlinGen(const int &x, const int &y) {
+
+	for (int i = 0; i < RAW_HEIGHT; i++) {
+		for (int j = 0; j < RAW_WIDTH; j++) {
+			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = generator->perlin(i + (cameraPosX+x)*RAW_WIDTH, j + (cameraPosY+y)*RAW_HEIGHT);
+			//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
+		}
+	}
+	chunk[x][y]->h->BufferData();
+		
 }

@@ -12,10 +12,10 @@ HeightMap::HeightMap(Vector2 pos) {
 	for (int x = 0; x < RAW_WIDTH; ++x) {
 		for (int z = 0; z < RAW_HEIGHT; ++z) {
 			int offset = (x * RAW_WIDTH) + z;
-
+	
 			vertices[offset] = Vector3(
 				x * HEIGHTMAP_X + pos.x, 0.0f, z * HEIGHTMAP_Z + pos.y);
-
+	
 			textureCoords[offset] = Vector2(
 				x * HEIGHTMAP_TEX_X, z * HEIGHTMAP_TEX_Z);
 		}
