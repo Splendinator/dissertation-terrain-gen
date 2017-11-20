@@ -15,7 +15,7 @@ int main() {
 	Chunk *prev = NULL;
 	Chunk *active = NULL;
 
-	Window w("Index Buffers!", 1600,900,false);
+	Window w("Index Buffers!", 1080,720,false);
 	if(!w.HasInitialised()) {
 		return -1;
 	}
@@ -35,15 +35,15 @@ int main() {
 	w.ShowOSPointer(false);
 
 
-	renderer.perlinGen(0, 0);
-	renderer.perlinGen(0, 1);
-	renderer.perlinGen(0, 2);
-	renderer.perlinGen(1, 0);
-	renderer.perlinGen(1, 1);
-	renderer.perlinGen(1, 2);
-	renderer.perlinGen(2, 0);
-	renderer.perlinGen(2, 1);
-	renderer.perlinGen(2, 2);
+	//renderer.perlinGen(0, 0);
+	//renderer.perlinGen(0, 1);
+	//renderer.perlinGen(0, 2);
+	//renderer.perlinGen(1, 0);
+	//renderer.perlinGen(1, 1);
+	//renderer.perlinGen(1, 2);
+	//renderer.perlinGen(2, 0);
+	//renderer.perlinGen(2, 1);
+	//renderer.perlinGen(2, 2);
 
 
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {

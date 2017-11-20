@@ -1,5 +1,6 @@
 #include <iostream>
 #include <random>
+#include <thread>
 #include "Renderer.h"
 
 
@@ -15,7 +16,9 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	}
 	setPointers();
 
-	generator = new Generator(-700.0f,700.0f,150.0f);
+	generator = new Generator(-500.0f,500.0f, 120.0f);
+	generator2 = new Generator(-600.0f, 600.0f, 230.0f);
+	generator3 = new Generator(-400.0f, 400.0f, 170.0f);
 
 	camera =			new Camera();
 	camera->SetPosition(Vector3(CHUNK_SIZE * MAX_CHUNKS / 2, HEIGHTMAP_Y*RAW_HEIGHT, CHUNK_SIZE * MAX_CHUNKS / 2));
@@ -76,26 +79,18 @@ void Renderer::RenderScene() {
 }
 
 Chunk * Renderer::getActiveChunk() {
-	//float x = camera->GetPosition().x/CHUNK_SIZE, y = camera->GetPosition().z / CHUNK_SIZE;
-	//float tx,ty,temp, dist = INFINITE;
-	//int ret = 0;
-	//
-	//
-	//for (int i = 0; i < MAX_CHUNKS*MAX_CHUNKS; i++) {
-	//	tx = (chunk[i]->getPosition().x + CHUNK_SIZE/2) / CHUNK_SIZE;
-	//	ty = (chunk[i]->getPosition().y + CHUNK_SIZE/2) / CHUNK_SIZE;
-	//	temp = sqrt((x - tx)*(x - tx) + (y - ty)*(y - ty));
-	//	if (dist > temp) {dist = temp; ret = i;}
-	//}
-	////DrawDebugLine(DEBUGDRAW_ORTHO, camera->GetPosition(), Vector3(chunk[ret]->getPosition().x + CHUNK_SIZE / 2, 0.0f, chunk[ret]->getPosition().y + CHUNK_SIZE / 2));
-	////cout << tx << " " << ty << " " << x << " " << y << " " << ret << " " << dist << " " << temp << endl;
-	//for (int i = 0; i < MAX_CHUNKS*MAX_CHUNKS; i++) {
-	//	cout << chunk[i]->getPosition();
-	//}
-	//cout << camera->GetPosition() << endl;
-	//return chunk[ret]; 
-
 	return chunk[MAX_CHUNKS / 2][MAX_CHUNKS / 2];
+}
+
+void threadPG(const int &x, const int &y) {
+
+	for (int i = 0; i < RAW_HEIGHT; i++) {
+		for (int j = 0; j < RAW_WIDTH; j++) {
+			//chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT)) + generator2->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
+			//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
+		}
+	}
+	//chunk[x][y]->h->BufferData();
 
 }
 
@@ -184,14 +179,17 @@ void Renderer::setPointers() {
 	}
 }
 
+
+
 void Renderer::perlinGen(const int &x, const int &y) {
 
 	for (int i = 0; i < RAW_HEIGHT; i++) {
 		for (int j = 0; j < RAW_WIDTH; j++) {
-			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = generator->perlin(i + (cameraPosX+x)*RAW_WIDTH, j + (cameraPosY+y)*RAW_HEIGHT);
+			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));// +generator2->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
 			//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
 		}
 	}
 	chunk[x][y]->h->BufferData();
 		
 }
+

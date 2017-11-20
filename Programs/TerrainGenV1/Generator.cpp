@@ -6,31 +6,15 @@
 Generator::Generator()
 {
 
-	//std::random_device(e);
-	//std::uniform_real_distribution<float> rand(-300.0f, 300.0f);
-	//rockiness = 50.0f;
-	//for (int i = 0; i < IYMAX; i++) {
-	//	for (int j = 0; j < IXMAX; j++) {
-	//		*Gradient[i][j][0] = rand(e);
-	//		*Gradient[i][j][1] = rand(e);
-	//	}
-	//}
 	
 }
 
-Generator::Generator(float minHeight, float maxHeight, float r) {
+Generator::Generator(float minHeight, float maxHeight, float rockiness) {
 
-	std::random_device(e);
-	std::uniform_real_distribution<float> rand(minHeight, maxHeight);
-	rockiness = r;
-	Gradient = new float[IYMAX*IXMAX*2];
+	m_rockiness = rockiness;
+	m_minHeight = minHeight;
+	m_maxHeight = maxHeight;
 
-	for (int i = 0; i < IYMAX; i++) {
-		for (int j = 0; j < IXMAX; j++) {
-			Gradient[2 * (i*IYMAX + j) + 0] = rand(e);
-			Gradient[2 * (i*IYMAX + j) + 1] = rand(e);
-		}
-	}
 }
 
 
@@ -45,20 +29,34 @@ float Generator::lerp(float a0, float a1, float w) {
 }
 
 // Computes the dot product of the distance and gradient vectors.
+
+//IX,IY - Co-oords of two points we are interpolating between.
 float Generator::dotGridGradient(int ix, int iy, float x, float y) {
+
 
 	// Compute the distance vector
 	float dx = x - (float)ix;
 	float dy = y - (float)iy;
 
+
+	srand((ix* 104723 + iy * 104729));																//Generate heights for the points on the big grid.
+	float min = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;		//Work out two points to interpolate between.
+	float max = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;
+
+	//std::cout << temp << " " << temp2 << std::endl;
+
 	// Compute the dot-product
-	return (dx*Gradient[2 * (iy*IYMAX + ix) + 0] + dy*Gradient[2 * (iy*IYMAX + ix) + 1]);
+	return (dx * min + dy*max);
 }
 
 // Compute Perlin noise at coordinates x, y
 float Generator::perlin(int x, int y) {
-	float fx = ((IXMAX / 2)*rockiness + x) / rockiness;
-	float fy = ((IYMAX / 2)*rockiness + y) / rockiness;
+	x = abs(x);
+	y = abs(y);
+	//std::cout << x << " " << y << std::endl;
+
+	float fx = x / m_rockiness;
+	float fy = y / m_rockiness;
 
 	// Determine grid cell coordinates
 	int x0 = fx;

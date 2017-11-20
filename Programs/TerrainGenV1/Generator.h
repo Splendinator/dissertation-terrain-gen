@@ -1,15 +1,15 @@
 #pragma once
 
-
+struct point {
+	float x, y;
+};
 
 class Generator
 {
 
 private:
 
-	static const int IYMAX = 2000, IXMAX = 2000;
-	float *Gradient;
-	float minHeight, maxHeight, rockiness;
+	float m_minHeight, m_maxHeight, m_rockiness;
 
 	// Function to linearly interpolate between a0 and a1
 	// Weight w should be in the range [0.0, 1.0]

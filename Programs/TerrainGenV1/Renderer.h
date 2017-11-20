@@ -24,6 +24,8 @@ public :
 
 	 Camera * camera ;
 	 Generator * generator;
+	 Generator * generator2;
+	 Generator * generator3;
 
 	 void shiftChunks(Direction dir);
 	 void setPointers();
