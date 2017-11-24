@@ -18,15 +18,21 @@ private:
 	// Computes the dot product of the distance and gradient vectors.
 	float dotGridGradient(int ix, int iy, float x, float y);
 
+
+	float Generator::fade(float t);
+
 public:
 	Generator();
 	Generator(float minHeight, float maxHeight, float r);
 	~Generator();
 
 
+	
 
 	// Compute Perlin noise at coordinates x, y
 	float perlin(int x, int y);
+
+	float simplex(int x, int y);
 	
 };
 

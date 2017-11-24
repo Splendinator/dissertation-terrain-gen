@@ -185,8 +185,9 @@ void Renderer::perlinGen(const int &x, const int &y) {
 
 	for (int i = 0; i < RAW_HEIGHT; i++) {
 		for (int j = 0; j < RAW_WIDTH; j++) {
-			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));// +generator2->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
-			//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
+			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->simplex(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));// +generator2->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
+			//cout << (generator->simplex(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
+																																	//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
 		}
 	}
 	chunk[x][y]->h->BufferData();
