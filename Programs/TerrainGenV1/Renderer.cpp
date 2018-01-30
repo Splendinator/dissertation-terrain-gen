@@ -16,7 +16,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	}
 	setPointers();
 
-	generator = new Generator(-500.0f,500.0f, 120.0f);
+	generator = new Generator(-500.0f,500.0f, 300.0f);
 	generator2 = new Generator(-600.0f, 600.0f, 230.0f);
 	generator3 = new Generator(-400.0f, 400.0f, 170.0f);
 
@@ -30,6 +30,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 		return;
 	}
 
+	currentShader->GetProgram();
 
 	projMatrix = Matrix4::Perspective(1.0f, 10000.0f,
 		(float)width / (float)height, 55.0f);
@@ -50,8 +51,8 @@ Renderer ::~Renderer(void) {
 
 void Renderer::UpdateScene(float msec) {
 	camera->UpdateCamera(msec);
-	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));					cameraPosX--;	shiftChunks(WEST);		}
-	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		cameraPosX++;	shiftChunks(EAST);		}
+	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));					cameraPosX--;	shiftChunks(WEST); 		}
+	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		cameraPosX++;	shiftChunks(EAST); 		}
 	if (camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));					cameraPosY--;	shiftChunks(NORTH);		}
 	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));	cameraPosY++;	shiftChunks(SOUTH);		}
 	viewMatrix = camera->BuildViewMatrix();
@@ -64,7 +65,10 @@ void Renderer::RenderScene() {
 	UpdateShaderMatrices();
 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
-		"diffuseTex"), 0);
+		"grassTex"), 0);
+
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"snowTex"), 1);
 
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
@@ -72,6 +76,10 @@ void Renderer::RenderScene() {
 		}
 	}
 	
+
+	//TODO: Water maybe?
+	//glUseProgram(waterShader->GetProgram());	
+	//water->Draw();
 
 
 	glUseProgram(0);
@@ -185,12 +193,10 @@ void Renderer::perlinGen(const int &x, const int &y) {
 
 	for (int i = 0; i < RAW_HEIGHT; i++) {
 		for (int j = 0; j < RAW_WIDTH; j++) {
-			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->simplex(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));// +generator2->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
-			//cout << (generator->simplex(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
-																																	//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
+			//chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT)) +generator2->simplex(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
 		}
 	}
-	chunk[x][y]->h->BufferData();
+	//chunk[x][y]->h->BufferData();
 		
 }
 

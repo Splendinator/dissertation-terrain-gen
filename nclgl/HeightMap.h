@@ -15,10 +15,18 @@
 #define HEIGHTMAP_TEX_X 1.0f / 16.0f
 #define HEIGHTMAP_TEX_Z 1.0f / 16.0f
 
+#define NUM_TEXTURES 2
+
 class HeightMap : public Mesh {
 public:
+	GLuint textureSnow;
+	GLuint textureGrass;
+	GLuint textureSand;
+
+
 	HeightMap(Vector2 pos);
 	~HeightMap(void) {};
 	//void makeHill(Vector2 pos, float dy, float rad);
 	void makeFlat();
+	void Draw(); //Overloaded from Mesh.h to support multiple textures.
 };

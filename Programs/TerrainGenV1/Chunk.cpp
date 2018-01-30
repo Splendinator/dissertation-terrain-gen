@@ -13,18 +13,26 @@ Chunk::Chunk(Vector2 pos) {
 	wc = pos;
 	prevId = 0;
 
-	h->SetTexture(SOIL_load_OGL_texture(
-		"../../Textures/BarrenReds.jpg",
-		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS));
+	h->textureGrass = SOIL_load_OGL_texture(
+		"../../Textures/Grass.png",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+
+	h->textureSnow = SOIL_load_OGL_texture(
+		"../../Textures/Snow.jpg",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 	
-	if (!h->GetTexture()) {
-		return;
-	}
+
+
 	
-	//TODO: Figure out what the fuck to do with textures later when we want snow on top of mountains and that.
-	glBindTexture(GL_TEXTURE_2D, h->GetTexture());
+
+	glBindTexture(GL_TEXTURE_2D, h->textureGrass);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
+
+	glBindTexture(GL_TEXTURE_2D, h->textureSnow);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
