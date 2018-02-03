@@ -44,6 +44,8 @@ float Generator::dotGridGradient(int ix, int iy, float x, float y) {
 	float a = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;		
 	float b = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;
 
+	std::cout << a << " " << b << std::endl;
+
 
 	// Compute the dot-product
 	return (dx * a + dy*b);
@@ -89,21 +91,10 @@ float Generator::perlin(int x, int y) {
 
 	//std::cout << " value: " << value << std::endl;
 
+	//if (n0 > 60) value -= 50000;
 
  	return value;
 }
-
-float Generator::fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
-
-static float grad(float x, float y) {
-	srand((x * 104723 + y * 104729));
-	int h = rand() & 15;                      // CONVERT LO 4 BITS OF HASH CODE
-	float u = h < 4 ? x : y;                    // INTO 12 GRADIENT DIRECTIONS.
-	float v = h < 4 ? y : x;
-	return ((h & 1) == 0 ? u : -u) + ((h & 2) == 0 ? v : -v);
-}
-
-
 
 
 
@@ -148,6 +139,10 @@ unsigned char perm[512] = { 151,160,137,91,90,15,
 49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
 138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
 };
+
+
+float Generator::fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
+
 
 float  grad2(int hash, float x, float y) {
 	int h = hash & 7;      // Convert low 3 bits of hash code
