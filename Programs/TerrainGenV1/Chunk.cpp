@@ -4,11 +4,12 @@
 
 Chunk::Chunk()
 {
-	Chunk(Vector2(0.0f,0.0f));
+	//Chunk(Vector2(0.0f,0.0f));
 	
 }
 
 Chunk::Chunk(Vector2 pos) {
+	
 	h = new HeightMap(pos);
 	wc = pos;
 	prevId = 0;
@@ -39,7 +40,7 @@ Chunk::Chunk(Vector2 pos) {
 
 Chunk::~Chunk()
 {
-	delete h;
+	//cout << "Deleting Chunk" << endl;
 }
 
 void Chunk::Draw() {
@@ -47,7 +48,7 @@ void Chunk::Draw() {
 }
 
 void Chunk::makeHill(Vector2 pos, float dy, float rad, UINT id) {
-	if (prevId == id) {
+ 	if (prevId == id) {
 		return;
 	}
 	prevId = id;
@@ -94,6 +95,7 @@ void Chunk::makeHill(Vector2 pos, float dy, float rad, UINT id) {
 void Chunk::Generate() {
 
 }
+
 
 
 

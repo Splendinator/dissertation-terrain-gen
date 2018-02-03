@@ -20,13 +20,16 @@ public:
 	HeightMap *h;			//Heightmap that will be rendered on screen.
 	Chunk *n = NULL, *e = NULL, *s = NULL, *w = NULL;	//Pointers to the chunk to the north,east,south,west.
 	
+	// Used for multi-threading.
+	bool started;	//Has a thread started working on this chunk?
+	bool finished;   //Has a thread finished working on this chunk?
+	bool visible;	//Should this chunk be rendered?
+
 
 	Chunk();
 	Chunk(Vector2 pos);
 	~Chunk();
-	
-	Vector2 getPosition() { return wc; };
-	HeightMap *getHeightMap() { return h; };
+
 
 	void Draw();
 

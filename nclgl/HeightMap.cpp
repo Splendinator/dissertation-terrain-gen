@@ -1,5 +1,11 @@
 #include "HeightMap.h"
 
+HeightMap::HeightMap() {
+
+}
+
+
+
 HeightMap::HeightMap(Vector2 pos) {
 
 	numVertices = RAW_WIDTH * RAW_HEIGHT;
@@ -76,4 +82,41 @@ void HeightMap::Draw(){
 
 	glBindVertexArray(0);
 
+}
+
+void HeightMap::operator=(HeightMap &rhs) {
+	cout << "Heightmap Assignment" << endl;
+	arrayObject = rhs.arrayObject;
+	numVertices = rhs.numVertices;
+	type = rhs.type;
+	texture = rhs.texture;
+	numIndices = rhs.numIndices;;
+
+	for (int i = 0; i < MAX_BUFFER; i++) {
+		bufferObject[i] = rhs.bufferObject[i];
+	}
+
+	if (rhs.textureCoords) {
+		textureCoords = new Vector2[numVertices];
+		memcpy(textureCoords, rhs.textureCoords, numVertices * sizeof(Vector2));
+	}
+	cout << this->textureCoords << " " << rhs.textureCoords << endl;
+
+	if (rhs.vertices) {
+		vertices = new Vector3[numVertices];
+		memcpy(vertices, rhs.vertices, numVertices * sizeof(Vector3));
+	}
+
+	if (rhs.colours) {
+		colours = new Vector4[numVertices];
+		memcpy(colours, rhs.colours, numVertices * sizeof(Vector4));
+	}
+
+	if (rhs.indices) {
+		indices = new unsigned int[numIndices];
+		memcpy(indices, rhs.indices, numIndices * sizeof(unsigned int));
+	}
+	textureSnow = rhs.textureSnow;
+	textureGrass = rhs.textureGrass;
+	textureSand = rhs.textureSand;
 }

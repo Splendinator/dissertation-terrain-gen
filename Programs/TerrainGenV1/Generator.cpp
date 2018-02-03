@@ -44,7 +44,6 @@ float Generator::dotGridGradient(int ix, int iy, float x, float y) {
 	float a = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;		
 	float b = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;
 
-	std::cout << a << " " << b << std::endl;
 
 
 	// Compute the dot-product
@@ -55,7 +54,6 @@ float Generator::dotGridGradient(int ix, int iy, float x, float y) {
 float Generator::perlin(int x, int y) {
 	x = abs(x);
 	y = abs(y);
-	//std::cout << x << " " << y << std::endl;
 
 	float fx = x / m_rockiness;
 	float fy = y / m_rockiness;
@@ -74,24 +72,15 @@ float Generator::perlin(int x, int y) {
 	// Interpolate between grid point gradients
 	float n0, n1, ix0, ix1, value;
 
-
 	n0 = dotGridGradient(x0, y0, fx, fy);
 	n1 = dotGridGradient(x1, y0, fx, fy);
 	ix0 = lerp(n0, n1, sx);
 
-	//std::cout << "n0: " << n0 << " n1: " << n1 << " ix0: " << ix0;
-
 	n0 = dotGridGradient(x0, y1, fx, fy);
 	n1 = dotGridGradient(x1, y1, fx, fy);
 	ix1 = lerp(n0, n1, sx);
-	
-	//std::cout << " n0: " << n0 << " n1: " << n1 << " ix1: " << ix1;
 
 	value = lerp(ix0, ix1, sy);
-
-	//std::cout << " value: " << value << std::endl;
-
-	//if (n0 > 60) value -= 50000;
 
  	return value;
 }

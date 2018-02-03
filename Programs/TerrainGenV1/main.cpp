@@ -35,17 +35,6 @@ int main() {
 	w.ShowOSPointer(false);
 
 
-	//renderer.perlinGen(0, 0);
-	//renderer.perlinGen(0, 1);
-	//renderer.perlinGen(0, 2);
-	//renderer.perlinGen(1, 0);
-	//renderer.perlinGen(1, 1);
-	//renderer.perlinGen(1, 2);
-	//renderer.perlinGen(2, 0);
-	//renderer.perlinGen(2, 1);
-	//renderer.perlinGen(2, 2);
-
-
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
 		renderer.RenderScene();

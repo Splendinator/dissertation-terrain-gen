@@ -5,20 +5,32 @@
 
 
 
-UINT id = 0;
+
+
 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
-			chunk[i][j] = new Chunk(Vector2(i*(CHUNK_SIZE),j*(CHUNK_SIZE)));
+			chunk[i*MAX_CHUNKS+j] = Chunk(Vector2(i*(CHUNK_SIZE),j*(CHUNK_SIZE)));
+			chunk[i*MAX_CHUNKS+j].started = chunk[i*MAX_CHUNKS + j].finished = chunk[i*MAX_CHUNKS + j].visible = false;
 		}
 	}
-	setPointers();
 
-	generator = new Generator(-500.0f,500.0f, 300.0f);
+	
+
+	//setPointers();
+
+	generator = new Generator(-500.0f, 500.0f, 300.0f);
 	generator2 = new Generator(-600.0f, 600.0f, 230.0f);
 	generator3 = new Generator(-400.0f, 400.0f, 170.0f);
+
+	for (int i = 0; i < MAX_THREADS; i++) {
+		t[i] = thread(&Renderer::threadLoop,this,i,(unsigned long long)chunk);
+		t[i].detach();
+	}
+
+
 
 	camera =			new Camera();
 	camera->SetPosition(Vector3(CHUNK_SIZE * MAX_CHUNKS / 2, HEIGHTMAP_Y*RAW_HEIGHT, CHUNK_SIZE * MAX_CHUNKS / 2));
@@ -49,12 +61,40 @@ Renderer ::~Renderer(void) {
 	delete camera;
 }
 
+
+
 void Renderer::UpdateScene(float msec) {
 	camera->UpdateCamera(msec);
-	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));					cameraPosX--;	shiftChunks(WEST); 		}
-	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2)) { camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));		cameraPosX++;	shiftChunks(EAST); 		}
-	if (camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));					cameraPosY--;	shiftChunks(NORTH);		}
-	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));	cameraPosY++;	shiftChunks(SOUTH);		}
+	
+	if (camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2))
+	{ 
+		camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));
+		cameraPosX--;
+		shiftChunks(WEST);
+	}
+	else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2))
+	{ 
+		camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));
+		cameraPosX++;
+		shiftChunks(EAST);
+	}
+	if		(camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2))
+	{ 
+		camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));
+		cameraPosY--;
+		shiftChunks(NORTH);	
+	}
+	else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) 
+	{ 
+		camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));
+		cameraPosY++;
+		shiftChunks(SOUTH);	
+	}
+
+	//if		(camera->GetPosition().x < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2))			{ camera->SetPosition(camera->GetPosition() + Vector3(CHUNK_SIZE, 0.0f, 0.0f));		cameraPosX--;	shiftChunks(WEST); 		}
+	//else if (camera->GetPosition().x > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS/2))	{ camera->SetPosition(camera->GetPosition() + Vector3(-CHUNK_SIZE, 0.0f, 0.0f));	cameraPosX++;	shiftChunks(EAST); 		}
+	//if		(camera->GetPosition().z < 0 + CHUNK_SIZE * (int)(MAX_CHUNKS / 2))			{ camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, CHUNK_SIZE));		cameraPosY--;	shiftChunks(NORTH);		}
+	//else if (camera->GetPosition().z > CHUNK_SIZE + CHUNK_SIZE * (int)(MAX_CHUNKS / 2)) { camera->SetPosition(camera->GetPosition() + Vector3(0.0f, 0.0f, -CHUNK_SIZE));	cameraPosY++;	shiftChunks(SOUTH);		}
 	viewMatrix = camera->BuildViewMatrix();
 }
 
@@ -72,7 +112,15 @@ void Renderer::RenderScene() {
 
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
-			chunk[i][j]->Draw();
+			
+			if (chunk[i * MAX_CHUNKS + j].finished && !chunk[i * MAX_CHUNKS + j].visible) {
+				chunk[i * MAX_CHUNKS + j].h->BufferData();	//Data buffering has to be done on the main thread, so we need this little check "if finished but not visible" to track the first frame a chunk is rendered.
+				chunk[i * MAX_CHUNKS + j].Draw();						
+				chunk[i * MAX_CHUNKS + j].visible = true;			//Set it visible so we don't re-buffer the same data next frame.
+			}
+			else if (chunk[i * MAX_CHUNKS + j].visible) {	//If chunk is visible just draw it like normal.
+				chunk[i * MAX_CHUNKS + j].Draw();	
+			}
 		}
 	}
 	
@@ -87,22 +135,11 @@ void Renderer::RenderScene() {
 }
 
 Chunk * Renderer::getActiveChunk() {
-	return chunk[MAX_CHUNKS / 2][MAX_CHUNKS / 2];
-}
-
-void threadPG(const int &x, const int &y) {
-
-	for (int i = 0; i < RAW_HEIGHT; i++) {
-		for (int j = 0; j < RAW_WIDTH; j++) {
-			//chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT)) + generator2->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
-			//cout << (i + (cameraPosX + x)*RAW_WIDTH) << " | " << (cameraPosY + y)*RAW_HEIGHT << endl;
-		}
-	}
-	//chunk[x][y]->h->BufferData();
-
+	return nullptr;
 }
 
 //TODO: Optimise this?
+//TODO: OPTIMISATION IDEA - LET THE GPU HANDLE X and Z coordinates based off UNIFORM VEC2 WorldCoordinates. This would let you just change a pointer to the chunk instead of updating all the Y values. 
 void Renderer::shiftChunks(Direction dir) {
 	int offset;
 	switch(dir){
@@ -110,13 +147,13 @@ void Renderer::shiftChunks(Direction dir) {
 			for (int i = MAX_CHUNKS-1; i >= 1 ; i--) {
 				for (int j = 0; j < MAX_CHUNKS; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-						chunk[i][j]->h->vertices[k].y =  chunk[i - 1][j]->h->vertices[k].y;
+						chunk[i * MAX_CHUNKS + j].h->vertices[k].y =  chunk[(i - 1) * MAX_CHUNKS + j].h->vertices[k].y;
 					}
 
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				perlinGen(0,i);
+				chunk[i].started = chunk[i].finished = chunk[i].visible = false;
 			}
 			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
 			}
@@ -127,12 +164,13 @@ void Renderer::shiftChunks(Direction dir) {
 			for (int i = 0; i < MAX_CHUNKS - 1; i++) {
 				for (int j = 0; j < MAX_CHUNKS; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-						chunk[i][j]->h->vertices[k].y = chunk[i + 1][j]->h->vertices[k].y;
+						chunk[i * MAX_CHUNKS + j].h->vertices[k].y = chunk[(i + 1) * MAX_CHUNKS + j].h->vertices[k].y;
 					}
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				perlinGen(MAX_CHUNKS - 1, i);
+				//perlinGen(MAX_CHUNKS - 1, i);
+				chunk[MAX_CHUNKS*(MAX_CHUNKS-1) + i].started = chunk[MAX_CHUNKS*(MAX_CHUNKS - 1) + i].finished = chunk[MAX_CHUNKS*(MAX_CHUNKS - 1) + i].visible = false;
 			}
 			for (int i = 1; i < MAX_CHUNKS - 1; i++) {
 			}
@@ -143,12 +181,13 @@ void Renderer::shiftChunks(Direction dir) {
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				for (int j = MAX_CHUNKS-1; j >= 1; j--) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-						chunk[i][j]->h->vertices[k].y = chunk[i][j-1]->h->vertices[k].y;
+						chunk[i * MAX_CHUNKS + j].h->vertices[k].y = chunk[i * MAX_CHUNKS + (j-1)].h->vertices[k].y;
 					}
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				perlinGen(i, 0);
+				//perlinGen(i, 0);
+				chunk[MAX_CHUNKS*i].started = chunk[MAX_CHUNKS*i].finished = chunk[MAX_CHUNKS*i].visible = false;
 			}
 			break;
 		}
@@ -157,12 +196,12 @@ void Renderer::shiftChunks(Direction dir) {
 			for (int i = 0; i < MAX_CHUNKS; i++) {
 				for (int j = 0; j < MAX_CHUNKS - 1; j++) {
 					for (int k = 0; k < RAW_HEIGHT*RAW_WIDTH; k++) {
-						chunk[i][j]->h->vertices[k].y = chunk[i][j + 1]->h->vertices[k].y;
+						chunk[i * MAX_CHUNKS + j].h->vertices[k].y = chunk[i * MAX_CHUNKS + (j + 1)].h->vertices[k].y;
 					};
 				}
 			}
 			for (int i = 0; i < MAX_CHUNKS; i++) {
-				perlinGen(i,MAX_CHUNKS - 1);
+				chunk[MAX_CHUNKS*i + MAX_CHUNKS - 1].started = chunk[MAX_CHUNKS*i + MAX_CHUNKS - 1].finished = chunk[MAX_CHUNKS*i + MAX_CHUNKS - 1].visible = false;
 			}
 			break;
 		}
@@ -170,7 +209,7 @@ void Renderer::shiftChunks(Direction dir) {
 	}
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
-			chunk[i][j]->h->BufferData();
+			chunk[i * MAX_CHUNKS + j].h->BufferData();
 		}
 	}
 }
@@ -179,24 +218,37 @@ void Renderer::shiftChunks(Direction dir) {
 void Renderer::setPointers() {
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
-			if (i > 0) chunk[i][j]->w = chunk[i - 1][j];
-			if (i < MAX_CHUNKS - 1) chunk[i][j]->e = chunk[i + 1][j];
-			if (j > 0) chunk[i][j]->n = chunk[i][j - 1];
-			if (j < MAX_CHUNKS - 1) chunk[i][j]->s = chunk[i][j + 1];
+			if (i > 0)					chunk[i * MAX_CHUNKS + j].w = &chunk[(i - 1) * MAX_CHUNKS + j];
+			if (i < MAX_CHUNKS - 1)		chunk[i * MAX_CHUNKS + j].e = &chunk[(i + 1) * MAX_CHUNKS + j];
+			if (j > 0)					chunk[i * MAX_CHUNKS + j].n = &chunk[i * MAX_CHUNKS + (j - 1)];
+			if (j < MAX_CHUNKS - 1)		chunk[i * MAX_CHUNKS + j].s = &chunk[i * MAX_CHUNKS + (j + 1)];
 		}
 	}
 }
 
+void Renderer::threadLoop(int id, unsigned long long c) {
+	while (true) {
+		for (int i = 0; i < MAX_CHUNKS; i++) {
+			for (int j = 0; j < MAX_CHUNKS; j++) {
+				if (!chunk[i * MAX_CHUNKS + j].started)	//If a thread hasn't started work on chunk[i][j] yet...
+				{
+					chunk[i * MAX_CHUNKS + j].started = true; //Signal that this thread has started
+					
 
+					for (int x = 0; x < RAW_HEIGHT; x++) {
+						for (int y = 0; y < RAW_WIDTH; y++) {
+							chunk[i * MAX_CHUNKS + j].h->vertices[x + RAW_WIDTH*y].y =									//Add together multiple noises.
+								  generator->simplex(y + (cameraPosX + i)*RAW_WIDTH, x + (cameraPosY + j)*RAW_HEIGHT)
+								+ generator->perlin(y + (cameraPosX + i)*RAW_WIDTH, x + (cameraPosY + j)*RAW_HEIGHT)
+								+ generator2->perlin(y + (cameraPosX + i)*RAW_WIDTH, x + (cameraPosY + j)*RAW_HEIGHT)
+								+ generator3->perlin(y + (cameraPosX + i)*RAW_WIDTH, x + (cameraPosY + j)*RAW_HEIGHT);
+						}
+					}
 
-void Renderer::perlinGen(const int &x, const int &y) {
+					chunk[i * MAX_CHUNKS + j].finished = true;	//Let main program know this chunk has generated
 
-	for (int i = 0; i < RAW_HEIGHT; i++) {
-		for (int j = 0; j < RAW_WIDTH; j++) {
-			chunk[x][y]->h->vertices[j + RAW_WIDTH*i].y = (generator->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));// +generator2->simplex(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT) + (generator3->perlin(i + (cameraPosX + x)*RAW_WIDTH, j + (cameraPosY + y)*RAW_HEIGHT));
+				}
+			}
 		}
 	}
-	chunk[x][y]->h->BufferData();
-		
 }
-

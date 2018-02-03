@@ -19,6 +19,8 @@ public:
 	void SetTexture(GLuint tex) { texture = tex; }
 	GLuint GetTexture() { return texture; }
 
+	void operator=(Mesh &rhs);
+
 
 
 //protected:

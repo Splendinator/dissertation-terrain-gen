@@ -17,6 +17,7 @@ Mesh::Mesh(void) {
 	type = GL_TRIANGLES;
 }
 Mesh ::~Mesh(void) {
+	cout << "Mesh Deleted - " << textureCoords << endl;
 	glDeleteVertexArrays(1, &arrayObject);
 	glDeleteBuffers(MAX_BUFFER, bufferObject);
 	glDeleteTextures(1, &texture);
@@ -136,4 +137,38 @@ void Mesh::Draw() {
 
 void Mesh::update() {
 	//Draw();
+}
+
+void Mesh::operator=(Mesh &rhs) {
+	cout << "Mesh Assignment" << endl;
+	arrayObject = rhs.arrayObject;
+	numVertices = rhs.numVertices;
+	type = rhs.type;
+	texture = rhs.texture;
+	numIndices = rhs.numIndices;;
+	
+	for (int i = 0; i < MAX_BUFFER; i++) {
+		bufferObject[i] = rhs.bufferObject[i];
+	}
+
+	if (rhs.textureCoords) {
+		textureCoords = new Vector2[numVertices];
+		memcpy(textureCoords, rhs.textureCoords, numVertices * sizeof(Vector2));
+	}
+	cout << this->textureCoords << " " << rhs.textureCoords << endl;
+
+	if (rhs.vertices) {
+		vertices = new Vector3[numVertices];
+		memcpy(vertices, rhs.vertices, numVertices * sizeof(Vector3));
+	}
+
+	if (rhs.colours) {
+		colours = new Vector4[numVertices];
+		memcpy(colours, rhs.colours, numVertices * sizeof(Vector4));
+	}
+
+	if (rhs.indices) {
+		indices = new unsigned int[numIndices];
+		memcpy(indices, rhs.indices, numIndices * sizeof(unsigned int));
+	}
 }

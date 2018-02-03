@@ -25,7 +25,11 @@ public:
 
 
 	HeightMap(Vector2 pos);
-	~HeightMap(void) {};
+	HeightMap();
+	~HeightMap(void) { cout << "Heightmap Destructor " << textureCoords << endl; };
+
+	void operator=(HeightMap &rhs);
+
 	//void makeHill(Vector2 pos, float dy, float rad);
 	void makeFlat();
 	void Draw(); //Overloaded from Mesh.h to support multiple textures.
