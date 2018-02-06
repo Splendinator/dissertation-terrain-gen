@@ -1,4 +1,4 @@
-#version 150
+#version 430
 uniform sampler2D grassTex;
 uniform sampler2D snowTex;
 

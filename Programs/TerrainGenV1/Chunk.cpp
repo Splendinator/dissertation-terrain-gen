@@ -10,8 +10,10 @@ Chunk::Chunk()
 
 Chunk::Chunk(Vector2 pos) {
 	
-	h = new HeightMap(pos);
 	wc = pos;
+
+	h = new HeightMap();
+	
 	prevId = 0;
 
 	h->textureGrass = SOIL_load_OGL_texture(
@@ -44,6 +46,10 @@ Chunk::~Chunk()
 }
 
 void Chunk::Draw() {
+
+	glUniform2f(10, wc.x*CHUNK_SIZE, wc.y*CHUNK_SIZE );	//Pass the X and Z values of the chunk to the GPU so that we can change all of them by changing one varbiale; saves lots of CPU time!
+														//Multiply by CHUNK_SIZE so that wc(1,0) means 1 chunk across and not one unit across.
+	
 	h->Draw();
 }
 

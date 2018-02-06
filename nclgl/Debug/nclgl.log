@@ -1,9 +1,2 @@
-﻿  Mesh.cpp
-  HeightMap.cpp
-  Generating Code...
-  Skipping... (no relevant changes detected)
-  Window.cpp
-  Shader.cpp
-  OGLRenderer.cpp
-  Camera.cpp
+﻿  HeightMap.cpp
   nclgl.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\nclgl.lib

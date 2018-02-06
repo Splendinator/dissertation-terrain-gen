@@ -10,20 +10,20 @@ enum Direction {
 class Chunk
 {
 private:
-	
 
-	Vector2 wc;				//X and Z world co-ordinates of chunk. 
 	int prevId = 0;
 
 public:
+
+	Vector2 wc;				//X and Z world co-ordinates of chunk. 
 
 	HeightMap *h;			//Heightmap that will be rendered on screen.
 	Chunk *n = NULL, *e = NULL, *s = NULL, *w = NULL;	//Pointers to the chunk to the north,east,south,west.
 	
 	// Used for multi-threading.
-	bool started;	//Has a thread started working on this chunk?
-	bool finished;   //Has a thread finished working on this chunk?
-	bool visible;	//Should this chunk be rendered?
+	bool started = false;	//Has a thread started working on this chunk?
+	bool finished = false;   //Has a thread finished working on this chunk?
+	bool visible = false;	//Should this chunk be rendered?
 
 
 	Chunk();
