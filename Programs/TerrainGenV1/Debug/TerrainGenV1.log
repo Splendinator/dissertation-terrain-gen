@@ -5,5 +5,9 @@ c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\prog
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(63): warning C4154: deletion of an array expression; conversion to pointer supplied
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(245): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(142): warning C4101: 'offset': unreferenced local variable
+  Generating Code...
+  Compiling...
+  main.cpp
+  Generating Code...
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.exe
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.pdb (Partial PDB)
