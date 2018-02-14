@@ -140,7 +140,6 @@ void Mesh::update() {
 }
 
 void Mesh::operator=(Mesh &rhs) {
-	cout << "Mesh Assignment" << endl;
 	arrayObject = rhs.arrayObject;
 	numVertices = rhs.numVertices;
 	type = rhs.type;

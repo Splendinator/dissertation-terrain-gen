@@ -1,8 +1,2 @@
-﻿  Window.cpp
-  Shader.cpp
-  OGLRenderer.cpp
-  Mesh.cpp
-  HeightMap.cpp
-  Camera.cpp
-  Generating Code...
+﻿  HeightMap.cpp
   nclgl.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\nclgl.lib

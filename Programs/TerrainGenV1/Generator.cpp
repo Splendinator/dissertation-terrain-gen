@@ -220,3 +220,132 @@ float Generator::simplex(int x, int y) {
 
 
 
+
+
+
+static float grad2lut[8][2] = {
+	{ -1.0f, -1.0f },{ 1.0f, 0.0f } ,{ -1.0f, 0.0f } ,{ 1.0f, 1.0f } ,
+	{ -1.0f, 1.0f } ,{ 0.0f, -1.0f } ,{ 0.0f, 1.0f } ,{ 1.0f, -1.0f }
+};
+
+static void grad2(int hash, float *gx, float *gy) {
+	int h = hash & 7;
+	*gx = grad2lut[h][0];
+	*gy = grad2lut[h][1];
+	return;
+}
+
+/** 2D simplex noise with derivatives.
+* If the last two arguments are not null, the analytic derivative
+* (the 2D gradient of the scalar noise field) is also calculated.
+*/
+float Generator::simplexD(float fx, float fy, float *dnoise_dx, float *dnoise_dy)
+{
+
+	float x = fx / m_rockiness;
+	float y = fy / m_rockiness;
+
+	float n0, n1, n2; /* Noise contributions from the three simplex corners */
+	float gx0, gy0, gx1, gy1, gx2, gy2; /* Gradients at simplex corners */
+	float t0, t1, t2, x1, x2, y1, y2;
+	float t20, t40, t21, t41, t22, t42;
+	float temp0, temp1, temp2, noise;
+
+	/* Skew the input space to determine which simplex cell we're in */
+	float s = (x + y) * F2; /* Hairy factor for 2D */
+	float xs = x + s;
+	float ys = y + s;
+	int ii, i = FASTFLOOR(xs);
+	int jj, j = FASTFLOOR(ys);
+
+	float t = (float)(i + j) * G2;
+	float X0 = i - t; /* Unskew the cell origin back to (x,y) space */
+	float Y0 = j - t;
+	float x0 = x - X0; /* The x,y distances from the cell origin */
+	float y0 = y - Y0;
+
+	/* For the 2D case, the simplex shape is an equilateral triangle.
+	* Determine which simplex we are in. */
+	int i1, j1; /* Offsets for second (middle) corner of simplex in (i,j) coords */
+	if (x0 > y0) { i1 = 1; j1 = 0; } /* lower triangle, XY order: (0,0)->(1,0)->(1,1) */
+	else { i1 = 0; j1 = 1; }      /* upper triangle, YX order: (0,0)->(0,1)->(1,1) */
+
+								  /* A step of (1,0) in (i,j) means a step of (1-c,-c) in (x,y), and
+								  * a step of (0,1) in (i,j) means a step of (-c,1-c) in (x,y), where
+								  * c = (3-sqrt(3))/6   */
+	x1 = x0 - i1 + G2; /* Offsets for middle corner in (x,y) unskewed coords */
+	y1 = y0 - j1 + G2;
+	x2 = x0 - 1.0f + 2.0f * G2; /* Offsets for last corner in (x,y) unskewed coords */
+	y2 = y0 - 1.0f + 2.0f * G2;
+
+	/* Wrap the integer indices at 256, to avoid indexing perm[] out of bounds */
+	ii = i % 256;
+	jj = j % 256;
+
+	/* Calculate the contribution from the three corners */
+	t0 = 0.5f - x0 * x0 - y0 * y0;
+	if (t0 < 0.0f) t40 = t20 = t0 = n0 = gx0 = gy0 = 0.0f; /* No influence */
+	else {
+		grad2(perm[ii + perm[jj]], &gx0, &gy0);
+		t20 = t0 * t0;
+		t40 = t20 * t20;
+		n0 = t40 * (gx0 * x0 + gy0 * y0);
+	}
+
+	t1 = 0.5f - x1 * x1 - y1 * y1;
+	if (t1 < 0.0f) t21 = t41 = t1 = n1 = gx1 = gy1 = 0.0f; /* No influence */
+	else {
+		grad2(perm[ii + i1 + perm[jj + j1]], &gx1, &gy1);
+		t21 = t1 * t1;
+		t41 = t21 * t21;
+		n1 = t41 * (gx1 * x1 + gy1 * y1);
+	}
+
+	t2 = 0.5f - x2 * x2 - y2 * y2;
+	if (t2 < 0.0f) t42 = t22 = t2 = n2 = gx2 = gy2 = 0.0f; /* No influence */
+	else {
+		grad2(perm[ii + 1 + perm[jj + 1]], &gx2, &gy2);
+		t22 = t2 * t2;
+		t42 = t22 * t22;
+		n2 = t42 * (gx2 * x2 + gy2 * y2);
+	}
+
+	/* Add contributions from each corner to get the final noise value.
+	* The result is scaled to return values in the interval [-1,1]. */
+	noise = 40.0f * (n0 + n1 + n2);
+
+	/* Compute derivative, if requested by supplying non-null pointers
+	* for the last two arguments */
+	if ((NULL != dnoise_dx) && (NULL != dnoise_dy))
+	{
+		/*  A straight, unoptimised calculation would be like:
+		*    *dnoise_dx = -8.0f * t20 * t0 * x0 * ( gx0 * x0 + gy0 * y0 ) + t40 * gx0;
+		*    *dnoise_dy = -8.0f * t20 * t0 * y0 * ( gx0 * x0 + gy0 * y0 ) + t40 * gy0;
+		*    *dnoise_dx += -8.0f * t21 * t1 * x1 * ( gx1 * x1 + gy1 * y1 ) + t41 * gx1;
+		*    *dnoise_dy += -8.0f * t21 * t1 * y1 * ( gx1 * x1 + gy1 * y1 ) + t41 * gy1;
+		*    *dnoise_dx += -8.0f * t22 * t2 * x2 * ( gx2 * x2 + gy2 * y2 ) + t42 * gx2;
+		*    *dnoise_dy += -8.0f * t22 * t2 * y2 * ( gx2 * x2 + gy2 * y2 ) + t42 * gy2;
+		*/
+		temp0 = t20 * t0 * (gx0* x0 + gy0 * y0);
+		*dnoise_dx = temp0 * x0;
+		*dnoise_dy = temp0 * y0;
+		temp1 = t21 * t1 * (gx1 * x1 + gy1 * y1);
+		*dnoise_dx += temp1 * x1;
+		*dnoise_dy += temp1 * y1;
+		temp2 = t22 * t2 * (gx2* x2 + gy2 * y2);
+		*dnoise_dx += temp2 * x2;
+		*dnoise_dy += temp2 * y2;
+		*dnoise_dx *= -8.0f;
+		*dnoise_dy *= -8.0f;
+		*dnoise_dx += t40 * gx0 + t41 * gx1 + t42 * gx2;
+		*dnoise_dy += t40 * gy0 + t41 * gy1 + t42 * gy2;
+		*dnoise_dx *= 40.0f; /* Scale derivative to match the noise scaling */
+		*dnoise_dy *= 40.0f;
+		*dnoise_dx *= m_maxHeight; /* Scale derivative to match m_maxHeight */
+		*dnoise_dy *= m_maxHeight;
+
+	}
+	return noise * m_maxHeight;
+}
+
+

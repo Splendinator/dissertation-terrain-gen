@@ -22,15 +22,22 @@ public:
 	GLuint textureSnow;
 	GLuint textureGrass;
 	GLuint textureSand;
+	GLuint textureRock;
 
+	GLuint gradientBufferObject;
+	
 
 	HeightMap(Vector2 pos);
 	HeightMap();
-	~HeightMap(void) { cout << "Heightmap Destructor " << textureCoords << endl; };
+	~HeightMap(void) { delete[] gradients; };
 
 	void operator=(HeightMap &rhs);
 
 	//void makeHill(Vector2 pos, float dy, float rad);
 	void makeFlat();
 	void Draw(); //Overloaded from Mesh.h to support multiple textures.
+
+	void BufferData();
+
+	Vector2 *gradients;
 };

@@ -19,6 +19,7 @@ private:
 	float dotGridGradient(int ix, int iy, float x, float y);
 
 
+
 	float Generator::fade(float t);
 
 public:
@@ -32,7 +33,11 @@ public:
 	// Compute Perlin noise at coordinates x, y
 	float perlin(int x, int y);
 
+	//Compute Simplex noise
 	float simplex(int x, int y);
+
+	//Simplex noise with analytical derrivitive. 
+	float simplexD(float fx, float fy, float *dnoise_dx, float *dnoise_dy);
 	
 };
 

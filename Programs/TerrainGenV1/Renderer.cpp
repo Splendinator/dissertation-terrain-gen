@@ -5,8 +5,12 @@
 
 
 
+/*BUGS:		Runtime error with too many (>23) chunks; something to do with textures. I think we're making a new texture for each chunk even though they all use the same textures and could just share them.
+			Same with indicies and texcoords, could just make them static instead of copy per heightmap.
 
+			Going exactly diagonally causes concurrency errors.
 
+*/
 
 Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
@@ -19,7 +23,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 
 	
 
-	//setPointers();
+	setPointers();
 
 	//Initialise noise generators.
 	generator = new Generator(-500.0f, 500.0f, 300.0f);
@@ -109,13 +113,16 @@ void Renderer::RenderScene() {
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
 		"snowTex"), 1);
 
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"rockTex"), 2);
+
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
 			
-			if (chunk[i * MAX_CHUNKS + j]->finished && !chunk[i * MAX_CHUNKS + j]->visible) {
-				chunk[i * MAX_CHUNKS + j]->h->BufferData();	//Data buffering has to be done on the main thread, so we need this little check "if finished but not visible" to track the first frame a chunk is rendered.
+			if (chunk[i * MAX_CHUNKS + j]->finished && !chunk[i * MAX_CHUNKS + j]->visible) {	//First frame a chunk becomes visible...
+				chunk[i * MAX_CHUNKS + j]->h->BufferData();	//Buffer the chunk data (has to be done on main thread)
 				chunk[i * MAX_CHUNKS + j]->Draw();
-				chunk[i * MAX_CHUNKS + j]->visible = true;			//Set it visible so we don't re-buffer the same data next frame.
+				chunk[i * MAX_CHUNKS + j]->visible = true;	//Set it visible so we don't re-buffer the same data next frame.
 			}
 			else if (chunk[i * MAX_CHUNKS + j]->visible) {	//If chunk is visible just draw it like normal.
 				chunk[i * MAX_CHUNKS + j]->Draw();
@@ -279,11 +286,19 @@ void Renderer::threadLoop(int id, unsigned long long c) {
 
 							if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
 
-							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y =									//Add together multiple noises.
-								generator->simplex(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
-								+ generator->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
-								+ generator2->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
-								+ generator3->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1));
+						//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y =									//Add together multiple noises.
+						//		  generator->simplex(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
+						//		+ generator->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
+						//		+ generator2->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
+						//		+ generator3->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1));
+
+							float dx, dy;
+
+							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = generator->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1),&dx,&dy);
+							chunk[i * MAX_CHUNKS + j]->h->gradients[x + RAW_WIDTH*y] = Vector2(dx, dy);
+
+							
+
 
 						}
 						if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop

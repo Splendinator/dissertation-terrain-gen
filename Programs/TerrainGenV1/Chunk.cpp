@@ -23,6 +23,10 @@ Chunk::Chunk(Vector2 pos) {
 	h->textureSnow = SOIL_load_OGL_texture(
 		"../../Textures/Snow.jpg",
 		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+
+	h->textureRock = SOIL_load_OGL_texture(
+		"../../Textures/Rock.jpg",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 	
 
 
@@ -33,6 +37,10 @@ Chunk::Chunk(Vector2 pos) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
 
 	glBindTexture(GL_TEXTURE_2D, h->textureSnow);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
+
+	glBindTexture(GL_TEXTURE_2D, h->textureRock);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
 

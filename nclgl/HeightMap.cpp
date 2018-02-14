@@ -7,6 +7,7 @@ HeightMap::HeightMap() {
 	vertices = new Vector3[numVertices];
 	textureCoords = new Vector2[numVertices];
 	indices = new GLuint[numIndices];
+	gradients = new Vector2[numVertices];
 
 
 	for (int x = 0; x < RAW_WIDTH; ++x) {
@@ -114,6 +115,9 @@ void HeightMap::Draw(){
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, textureSnow);
 
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, textureRock);
+
 	glBindVertexArray(arrayObject);
 
 
@@ -127,6 +131,55 @@ void HeightMap::Draw(){
 	glBindVertexArray(0);
 
 }
+
+
+void HeightMap::BufferData() {
+	glDeleteBuffers(MAX_BUFFER, bufferObject);
+	glDeleteBuffers(1, &gradientBufferObject);
+	glBindVertexArray(arrayObject);
+	glGenBuffers(1, &bufferObject[VERTEX_BUFFER]);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferObject[VERTEX_BUFFER]);
+	glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector3),
+		vertices, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(VERTEX_BUFFER, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(VERTEX_BUFFER);
+
+	if (textureCoords) { // This bit is new !
+		glGenBuffers(1, &bufferObject[TEXTURE_BUFFER]);
+		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[TEXTURE_BUFFER]);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector2),
+			textureCoords, GL_STATIC_DRAW);
+		glVertexAttribPointer(TEXTURE_BUFFER, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(TEXTURE_BUFFER);
+	}
+	if (colours) {
+		glGenBuffers(1, &bufferObject[COLOUR_BUFFER]);
+		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[COLOUR_BUFFER]);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector4),
+			colours, GL_STATIC_DRAW);
+		glVertexAttribPointer(COLOUR_BUFFER, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(COLOUR_BUFFER);
+	}
+	if (indices) {
+		glGenBuffers(1, &bufferObject[INDEX_BUFFER]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+			bufferObject[INDEX_BUFFER]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLuint),
+			indices, GL_STATIC_DRAW);
+	}
+	if (gradients) {
+		glGenBuffers(1, &gradientBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, gradientBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector2),
+			gradients, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(6);
+	}
+
+	glBindVertexArray(0);
+}
+
+
 
 void HeightMap::operator=(HeightMap &rhs) {
 	arrayObject = rhs.arrayObject;
@@ -162,3 +215,4 @@ void HeightMap::operator=(HeightMap &rhs) {
 	textureGrass = rhs.textureGrass;
 	textureSand = rhs.textureSand;
 }
+
