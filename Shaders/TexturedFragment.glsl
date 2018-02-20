@@ -15,8 +15,8 @@ out vec4 gl_FragColor;
 const float SNOW_HEIGHT = 400f;
 const float SNOW_LERP = 400f;
 
-const float ROCK_GRAD = 200f;
-const float ROCK_LERP = 200f;
+const float ROCK_GRAD = 400f;
+const float ROCK_LERP = 1200f;
 
 vec4 lerp(sampler2D t1, sampler2D t2, float pct){
 		if (pct > 1) pct = 1;
@@ -35,10 +35,12 @@ void main(void){
 	if (IN.height > SNOW_HEIGHT) { gl_FragColor = lerp(grassTex,snowTex,(IN.height-SNOW_HEIGHT) / SNOW_LERP); }
 	
 
-	float multiplier = (cos(atan(IN.gradient.x/IN.gradient.y)*2) + 1)/2; //Multiplier based off direction of gradient.
-	float grad = (abs(IN.gradient.x) + abs(IN.gradient.y)) * multiplier; 
+	//float multiplier = (cos(atan(IN.gradient.x/IN.gradient.y)*2) + 1)/2; //Multiplier based off direction of gradient.
+	//float grad = (abs(IN.gradient.x) + abs(IN.gradient.y)) * multiplier; 
+	float grad = sqrt(IN.gradient.x * IN.gradient.x + IN.gradient.y * IN.gradient.y); //Get magnitude of gradient
 	
 	//if (abs(IN.gradient.x) + abs(IN.gradient.y) > ROCK_GRAD) { gl_FragColor = texture(rockTex,IN.texCoord); }
+	//if (grad > ROCK_GRAD) { gl_FragColor = lerp(gl_FragColor,rockTex,(grad-ROCK_GRAD)  / ROCK_LERP); }
 	if (grad > ROCK_GRAD) { gl_FragColor = lerp(gl_FragColor,rockTex,(grad-ROCK_GRAD)  / ROCK_LERP); }
 }
 

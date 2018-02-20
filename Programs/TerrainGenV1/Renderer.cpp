@@ -26,9 +26,10 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	setPointers();
 
 	//Initialise noise generators.
-	generator = new Generator(-500.0f, 500.0f, 300.0f);
+	generator = new Generator(-700.0f, 700.0f, 150.0f);
 	generator2 = new Generator(-9000.0f, 9000.0f, 1800.0f);
 	generator3 = new Generator(-40.0f, 40.0f, 17.0f);
+	biomeMap = BiomeMap(610, 200);
 
 	//Initialising the threads.
 	for (int i = 0; i < MAX_THREADS; i++) {
@@ -286,18 +287,28 @@ void Renderer::threadLoop(int id, unsigned long long c) {
 
 							if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
 
-						//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y =									//Add together multiple noises.
-						//		  generator->simplex(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
-						//		+ generator->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
-						//		+ generator2->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
-						//		+ generator3->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1));
 
-							float dx, dy;
+						//Snowy Hills
+						/*		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y =									//Add together multiple noises.
+								  generator->simplex(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
+								+ generator->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
+								+ generator2->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))
+								+ generator3->perlin(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1));
+						*/
+
+
+						//Rocky hills;
+						/*	float dx, dy;
 
 							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = generator->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1),&dx,&dy);
 							chunk[i * MAX_CHUNKS + j]->h->gradients[x + RAW_WIDTH*y] = Vector2(dx, dy);
+						*/
 
-							
+
+						//Biomes
+							float *biomePct = biomeMap.getBiome(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1));
+
+							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0 + 600 * biomePct[1] + 1200 * biomePct[2];
 
 
 						}

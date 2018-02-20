@@ -1,14 +1,18 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (TerrainGen.vcxproj, Tutorial 08 - Index Buffers.vcxproj).  This can lead to incorrect clean and rebuild behavior.
   Renderer.cpp
 c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(20): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(67): warning C4156: deletion of an array expression without using the array form of 'delete'; array form substituted
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(67): warning C4154: deletion of an array expression; conversion to pointer supplied
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(252): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(149): warning C4101: 'offset': unreferenced local variable
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(297): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(68): warning C4156: deletion of an array expression without using the array form of 'delete'; array form substituted
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(68): warning C4154: deletion of an array expression; conversion to pointer supplied
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(253): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(150): warning C4101: 'offset': unreferenced local variable
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(309): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   Generating Code...
   Compiling...
   main.cpp
+  BiomeMap.cpp
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\biomemap.cpp(20): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\biomemap.cpp(40): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
   Generating Code...
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\biomemap.cpp(81): warning C4172: returning address of local variable or temporary: results
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.exe
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.pdb (Partial PDB)
