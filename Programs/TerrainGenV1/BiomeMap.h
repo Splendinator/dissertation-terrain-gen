@@ -11,7 +11,7 @@ struct BiomePoint {
 };
 
 const int GRID_POINTS = 2;	//How many grid points around the player will be used for biome generation. Upping this will get better biome generation when combined with a higher offset but very slow.
-const float BORDER_LERP = 130;
+const float BORDER_LERP = 300;
 
 #pragma once
 class BiomeMap
@@ -28,7 +28,7 @@ public:
 	BiomeMap(int gridSize, int offset);
 
 	//Returns an array of biome percentages in the ENUM order.    Array length = MAX_BIOMES;
-	float * getBiome(float x, float y);
+	void getBiome(float x, float y, float *results);
 
 	~BiomeMap();
 };

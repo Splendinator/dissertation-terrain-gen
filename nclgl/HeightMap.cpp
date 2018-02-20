@@ -8,6 +8,7 @@ HeightMap::HeightMap() {
 	textureCoords = new Vector2[numVertices];
 	indices = new GLuint[numIndices];
 	gradients = new Vector2[numVertices];
+	biomes = new Vector4[numVertices];
 
 
 	for (int x = 0; x < RAW_WIDTH; ++x) {
@@ -118,6 +119,10 @@ void HeightMap::Draw(){
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, textureRock);
 
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, textureSand);
+
+
 	glBindVertexArray(arrayObject);
 
 
@@ -175,6 +180,14 @@ void HeightMap::BufferData() {
 		glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(6);
 	}
+	if (biomes) {
+		glGenBuffers(1, &biomeBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, biomeBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector4),
+			biomes, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(7);
+	}
 
 	glBindVertexArray(0);
 }
@@ -213,6 +226,7 @@ void HeightMap::operator=(HeightMap &rhs) {
 	}
 	textureSnow = rhs.textureSnow;
 	textureGrass = rhs.textureGrass;
+	textureRock = rhs.textureRock;
 	textureSand = rhs.textureSand;
 }
 

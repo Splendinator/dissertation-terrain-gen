@@ -26,10 +26,11 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	setPointers();
 
 	//Initialise noise generators.
-	generator = new Generator(-700.0f, 700.0f, 150.0f);
-	generator2 = new Generator(-9000.0f, 9000.0f, 1800.0f);
-	generator3 = new Generator(-40.0f, 40.0f, 17.0f);
-	biomeMap = BiomeMap(610, 200);
+	generator = new Generator(-1000.0f, 1000.0f, 1800.0f);
+	generator2 = new Generator(-1200.0f, 1200.0f, 300.0f);
+	generator3 = new Generator(-4000.0f, 4000.0f, 750.0f);
+	generator4 = new Generator(-200.0f, 200.0f, 60.0f);
+	biomeMap = BiomeMap(2240, 820);
 
 	//Initialising the threads.
 	for (int i = 0; i < MAX_THREADS; i++) {
@@ -116,6 +117,9 @@ void Renderer::RenderScene() {
 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
 		"rockTex"), 2);
+
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"sandTex"), 3);
 
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
@@ -306,9 +310,52 @@ void Renderer::threadLoop(int id, unsigned long long c) {
 
 
 						//Biomes
-							float *biomePct = biomeMap.getBiome(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1));
+							
+							float biomePct[MAX_BIOMES];
+							biomeMap.getBiome(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1) , biomePct);
 
-							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0 + 600 * biomePct[1] + 1200 * biomePct[2];
+
+							float dx = 0, dy = 0;
+							float tx, ty;
+
+					
+							//chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 1200 * biomePct[0];
+							chunk[i * MAX_CHUNKS + j]->h->biomes[x + RAW_WIDTH*y].x = biomePct[0];
+							chunk[i * MAX_CHUNKS + j]->h->biomes[x + RAW_WIDTH*y].y = biomePct[1];
+							chunk[i * MAX_CHUNKS + j]->h->biomes[x + RAW_WIDTH*y].z = biomePct[2];
+
+							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0;
+
+							//Field
+							if (biomePct[0] > 0) {
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[0] * generator->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
+
+							}
+							
+							//Hills
+							if (biomePct[1] > 0) {
+
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator2->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
+ 								dx += biomePct[1] * tx;
+								dy += biomePct[1] * ty;
+
+								
+
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator3->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
+								dx += biomePct[1] * tx;
+								dy += biomePct[1] * ty;
+
+								
+
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator4->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
+								dx += biomePct[1] * tx;
+								dy += biomePct[1] * ty;
+
+								chunk[i * MAX_CHUNKS + j]->h->gradients[x + RAW_WIDTH*y] = Vector2(dx, dy);
+							
+							}
+							//Desert
+							
 
 
 						}

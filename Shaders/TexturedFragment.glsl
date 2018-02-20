@@ -2,11 +2,13 @@
 uniform sampler2D grassTex;
 uniform sampler2D snowTex;
 uniform sampler2D rockTex;
+uniform sampler2D sandTex;
 
 in Vertex {
 	vec2 texCoord;
 	float height;
 	vec2 gradient;
+	vec4 biomes;
 } IN;
 
 out vec4 gl_FragColor;
@@ -15,8 +17,8 @@ out vec4 gl_FragColor;
 const float SNOW_HEIGHT = 400f;
 const float SNOW_LERP = 400f;
 
-const float ROCK_GRAD = 400f;
-const float ROCK_LERP = 1200f;
+const float ROCK_GRAD = 4f;
+const float ROCK_LERP = 8f;
 
 vec4 lerp(sampler2D t1, sampler2D t2, float pct){
 		if (pct > 1) pct = 1;
@@ -32,16 +34,13 @@ vec4 lerp(vec4 t1, sampler2D t2, float pct){
 
 void main(void){
 	gl_FragColor = texture(grassTex, IN.texCoord);
-	if (IN.height > SNOW_HEIGHT) { gl_FragColor = lerp(grassTex,snowTex,(IN.height-SNOW_HEIGHT) / SNOW_LERP); }
+	if (IN.height > SNOW_HEIGHT) { gl_FragColor = lerp(gl_FragColor,snowTex,(IN.height-SNOW_HEIGHT) / SNOW_LERP); }
 	
 
-	//float multiplier = (cos(atan(IN.gradient.x/IN.gradient.y)*2) + 1)/2; //Multiplier based off direction of gradient.
-	//float grad = (abs(IN.gradient.x) + abs(IN.gradient.y)) * multiplier; 
 	float grad = sqrt(IN.gradient.x * IN.gradient.x + IN.gradient.y * IN.gradient.y); //Get magnitude of gradient
-	
-	//if (abs(IN.gradient.x) + abs(IN.gradient.y) > ROCK_GRAD) { gl_FragColor = texture(rockTex,IN.texCoord); }
-	//if (grad > ROCK_GRAD) { gl_FragColor = lerp(gl_FragColor,rockTex,(grad-ROCK_GRAD)  / ROCK_LERP); }
-	if (grad > ROCK_GRAD) { gl_FragColor = lerp(gl_FragColor,rockTex,(grad-ROCK_GRAD)  / ROCK_LERP); }
+	if (grad > ROCK_GRAD) { gl_FragColor = lerp(gl_FragColor,rockTex,((grad-ROCK_GRAD)  / ROCK_LERP) * IN.biomes.y); }
+
+	gl_FragColor = lerp(gl_FragColor,sandTex,IN.biomes.z);
 }
 
 

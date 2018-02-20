@@ -25,6 +25,7 @@ public:
 	GLuint textureRock;
 
 	GLuint gradientBufferObject;
+	GLuint biomeBufferObject;
 	
 
 	HeightMap(Vector2 pos);
@@ -40,4 +41,5 @@ public:
 	void BufferData();
 
 	Vector2 *gradients;
+	Vector4 *biomes;
 };

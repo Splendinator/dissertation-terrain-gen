@@ -22,12 +22,10 @@ BiomePoint BiomeMap::randomPoint(int x, int y) {
 	return b;
 }
 
-float * BiomeMap::getBiome(float x, float y) {
+void BiomeMap::getBiome(float x, float y, float *results) {
 
 	x = abs(x);
 	y = abs(y);
-
-	float results[MAX_BIOMES];	//Returning this; array of percentages of each biome that influences this point.
 
 	float distance[GRID_POINTS * GRID_POINTS]; //Distance to each point.
 	Biome biome[GRID_POINTS * GRID_POINTS];	//Biome of each point.
@@ -77,8 +75,6 @@ float * BiomeMap::getBiome(float x, float y) {
 		results[biome[i]] += distance[i] / totalDistance;
 	}
 
-
-	return results;
 }
 
 BiomeMap::~BiomeMap()

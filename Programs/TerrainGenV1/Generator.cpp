@@ -341,8 +341,8 @@ float Generator::simplexD(float fx, float fy, float *dnoise_dx, float *dnoise_dy
 		*dnoise_dy += t40 * gy0 + t41 * gy1 + t42 * gy2;
 		*dnoise_dx *= 40.0f; /* Scale derivative to match the noise scaling */
 		*dnoise_dy *= 40.0f;
-		*dnoise_dx *= m_maxHeight; /* Scale derivative to match m_maxHeight */
-		*dnoise_dy *= m_maxHeight;
+		*dnoise_dx *= m_maxHeight / m_rockiness; /* Scale derivative to match m_maxHeight and m_rockiness */
+		*dnoise_dy *= m_maxHeight / m_rockiness;
 
 
 	}
