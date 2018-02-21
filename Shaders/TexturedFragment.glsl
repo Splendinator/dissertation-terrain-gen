@@ -17,8 +17,8 @@ out vec4 gl_FragColor;
 const float SNOW_HEIGHT = 400f;
 const float SNOW_LERP = 400f;
 
-const float ROCK_GRAD = 4f;
-const float ROCK_LERP = 8f;
+const float ROCK_GRAD = 5f;
+const float ROCK_LERP = 12f;
 
 vec4 lerp(sampler2D t1, sampler2D t2, float pct){
 		if (pct > 1) pct = 1;

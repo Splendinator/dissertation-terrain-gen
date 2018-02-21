@@ -30,6 +30,12 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 	generator2 = new Generator(-1200.0f, 1200.0f, 300.0f);
 	generator3 = new Generator(-4000.0f, 4000.0f, 750.0f);
 	generator4 = new Generator(-200.0f, 200.0f, 60.0f);
+	
+	//Desert Generators
+	generator5 = new Generator(-2700, 900, 1000);
+	generator6 = new Generator(-750, 250, 160);
+
+
 	biomeMap = BiomeMap(2240, 820);
 
 	//Initialising the threads.
@@ -335,27 +341,72 @@ void Renderer::threadLoop(int id, unsigned long long c) {
 							//Hills
 							if (biomePct[1] > 0) {
 
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator2->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
- 								dx += biomePct[1] * tx;
-								dy += biomePct[1] * ty;
-
-								
-
 								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator3->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
 								dx += biomePct[1] * tx;
 								dy += biomePct[1] * ty;
 
-								
+								float grad = sqrt(dx * dx + dy * dy); //Gradient Magnitude
+								float gradMult;
 
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator4->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
-								dx += biomePct[1] * tx;
-								dy += biomePct[1] * ty;
+								if (grad > 3.0f) {
+									gradMult = min((grad - 3.0f) / 3.0f, 1);
+									//cout << grad << " " << gradMult << endl;
+									chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (gradMult * (biomePct[1] * generator2->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty)));
+									dx += gradMult * biomePct[1] * tx;
+									dy += gradMult * biomePct[1] * ty;
+								}
+
+								grad = sqrt(dx * dx + dy * dy); //Gradient Magnitude
+								
+								if (grad > 6.0f) {
+									gradMult = min((grad - 6.0f) / 4.0f, 1);
+									chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (gradMult * (biomePct[1] * generator4->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty)));
+									dx += gradMult * biomePct[1] * tx;
+									dy += gradMult * biomePct[1] * ty;
+								}
 
 								chunk[i * MAX_CHUNKS + j]->h->gradients[x + RAW_WIDTH*y] = Vector2(dx, dy);
 							
 							}
+
 							//Desert
+							if (biomePct[2] > 0) {
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[2] * generator5->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[2] * generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
+
+								//Domain Warping - Sand dunes
+								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += 
+									(biomePct[2] *
+										generator6->perlin(
+											generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) - 1), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 6) * 0.15) * 1.1,
+											generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) + 9), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) - 2) * 0.15) * 1.1
+										) * 5
+									);
+							}
 							
+							
+								
+								
+								
+							//3-layer domain warping	
+							//generator6->perlin(
+							//		generator6->perlin(
+							//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) + 7, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 2) * 3,
+							//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) - 5, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 1) * 3 
+							//		)																										    * 3,
+							//		generator6->perlin(
+							//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) - 5, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 3) * 3,
+							//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) + 2, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 0) * 3
+							//		)																											* 3
+							//	)																												* 5
+							//	;
+
+							//2-Layer domain warping
+							//	generator6->perlin(
+							//		generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) - 1), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 6) * 0.15) * 1.1 , 
+							//		generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) + 9), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) - 2) * 0.15) * 1.1
+							//	) * 5 + 400
+							//	;
 
 
 						}
