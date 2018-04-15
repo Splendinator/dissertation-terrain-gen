@@ -6,9 +6,9 @@ BiomeMap::BiomeMap()
 {
 }
 
-BiomeMap::BiomeMap(int gridSize, int offset) {
+BiomeMap::BiomeMap(int gridSize, int variance) {
 	m_gridSize = gridSize;
-	m_offset = offset;
+	m_variance = variance;
 }
 
 //Generates a random point given a grid location 
@@ -17,7 +17,7 @@ BiomePoint BiomeMap::randomPoint(int x, int y) {
 	srand((x * 104723 + y * 104729));
 	
 	BiomePoint b;
-	b.loc = Vector2(x - m_offset + (rand() % (2 * m_offset)), y - m_offset + (rand() % (2 * m_offset)));
+	b.loc = Vector2(x - m_variance + (rand() % (2 * m_variance)), y - m_variance + (rand() % (2 * m_variance)));
 	b.biome = Biome(rand() % MAX_BIOMES);
 	return b;
 }
@@ -75,6 +75,52 @@ void BiomeMap::getBiome(float x, float y, float *results) {
 		results[biome[i]] += distance[i] / totalDistance;
 	}
 
+}
+
+float BiomeMap::getWorley(float x, float y, float minHeight, float maxHeight, float dist, int n) {
+
+	x = abs(x);
+	y = abs(y);
+
+	float distance[GRID_POINTS * GRID_POINTS]; //Distance to each point.
+
+
+	//Generate all grid points, and get distances for each point
+	for (int i = 0; i < GRID_POINTS; i++) {
+		for (int j = 0; j < GRID_POINTS; j++) {
+			BiomePoint gridPoint = randomPoint(x - fmod(x, m_gridSize) + (m_gridSize * (i - (GRID_POINTS / 2 - 1))), y - fmod(y, m_gridSize) + (m_gridSize * (j - (GRID_POINTS / 2 - 1))));				//Generate the grid points.
+			distance[i*GRID_POINTS + j] = sqrt((gridPoint.loc.x - x) * (gridPoint.loc.x - x) + (gridPoint.loc.y - y) * (gridPoint.loc.y - y));					//Calculate distances to each grid point using pythagerous.
+			
+		}
+	}
+	
+
+
+	//Find N'th closest point point.
+	float *value = new float[n+1];
+	value[0] = 0;
+	for (int j = 1; j < n + 1; ++j) {
+		value[j] = dist;
+	}
+
+	for (int i = 0; i < (GRID_POINTS * GRID_POINTS); ++i) {
+		//std::cout << distance[i] << " " << std::endl;
+		for (int j = 1; j < n+1; ++j) {
+			if (distance[i] <= value[j] && distance[i] >= value[j - 1]) {
+				for (int k = n; k > j; --k) {
+					value[k] = value[k - 1];
+				}
+				value[j] = distance[i];
+				break;
+			}
+		}
+	}
+	//std::cout << "P: " << value[0] << " " << value[1] << " " << value[2] << std::endl << std::endl;
+	float height = minHeight + value[n] / dist * (maxHeight - minHeight) ;
+	delete[] value;
+
+	return height;
+	
 }
 
 BiomeMap::~BiomeMap()

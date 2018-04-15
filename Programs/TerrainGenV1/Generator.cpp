@@ -18,6 +18,9 @@ Generator::Generator(float minHeight, float maxHeight, float rockiness) {
 }
 
 
+float Generator::fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
+
+
 Generator::~Generator()
 {
 }
@@ -40,12 +43,11 @@ float Generator::dotGridGradient(int ix, int iy, float x, float y) {
 	float dy = y - (float)iy;
 
 
-	srand((ix* 104723 + iy * 104729));																//Generate heights for the points on the big grid.
-	float a = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;		
-	float b = m_minHeight + ((rand() % 100)*(m_maxHeight - m_minHeight)) / 100 + m_minHeight;
+	//Generate heights for the points on the big grid.
+	srand((ix* 104723 + iy * 104729));
+	float a = 0, b = 0;
 
-
-
+	(rand() % 2 ? (rand() % 2 ? a = 1 : a = -1) : (rand() % 2 ? b = 1 : b = -1));
 	// Compute the dot-product
 	return (dx * a + dy*b);
 }
@@ -66,8 +68,8 @@ float Generator::perlin(int x, int y) {
 
 	// Determine interpolation weights
 	// Could also use higher order polynomial/s-curve here
-	float sx = fx - (float)x0;
-	float sy = fy - (float)y0;
+	float sx = fade(fx - (float)x0);
+	float sy = fade(fy - (float)y0);
 
 	// Interpolate between grid point gradients
 	float n0, n1, ix0, ix1, value;
@@ -82,7 +84,7 @@ float Generator::perlin(int x, int y) {
 
 	value = lerp(ix0, ix1, sy);
 
- 	return value;
+ 	return m_minHeight + (value + 0.5) * (m_maxHeight - m_minHeight);
 }
 
 
@@ -130,7 +132,7 @@ unsigned char perm[512] = { 151,160,137,91,90,15,
 };
 
 
-float Generator::fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
+
 
 
 float  grad2(int hash, float x, float y) {
@@ -212,7 +214,7 @@ float Generator::simplex(int x, int y) {
 		// Add contributions from each corner to get the final noise value.
 		// The result is scaled to return values in the interval [-1,1].
 
-		return 40.0f * m_maxHeight * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
+		return m_minHeight + m_maxHeight * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
 
 }
 
@@ -346,7 +348,7 @@ float Generator::simplexD(float fx, float fy, float *dnoise_dx, float *dnoise_dy
 
 
 	}
-	return noise * m_maxHeight;
+	return m_minHeight + noise * m_maxHeight;
 }
 
 

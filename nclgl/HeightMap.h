@@ -23,14 +23,21 @@ public:
 	GLuint textureGrass;
 	GLuint textureSand;
 	GLuint textureRock;
+	GLuint textureWater;
 
-	GLuint gradientBufferObject;
-	GLuint biomeBufferObject;
+	GLuint textureBufferObject;
+	GLuint shadeBufferObject;
+	GLuint waterBufferObject;
+	
 	
 
 	HeightMap(Vector2 pos);
 	HeightMap();
-	~HeightMap(void) { delete[] gradients; };
+	~HeightMap(void) { 
+		delete[] texturePct;
+		delete[] shadePct;
+		delete[] water;
+	};
 
 	void operator=(HeightMap &rhs);
 
@@ -40,6 +47,7 @@ public:
 
 	void BufferData();
 
-	Vector2 *gradients;
-	Vector4 *biomes;
+	Vector4 *texturePct;
+	float *shadePct;
+	float *water;
 };

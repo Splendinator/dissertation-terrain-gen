@@ -7,8 +7,9 @@ HeightMap::HeightMap() {
 	vertices = new Vector3[numVertices];
 	textureCoords = new Vector2[numVertices];
 	indices = new GLuint[numIndices];
-	gradients = new Vector2[numVertices];
-	biomes = new Vector4[numVertices];
+	shadePct = new float[numVertices];
+	water = new float[numVertices];
+	texturePct = new Vector4[numVertices];
 
 
 	for (int x = 0; x < RAW_WIDTH; ++x) {
@@ -140,7 +141,6 @@ void HeightMap::Draw(){
 
 void HeightMap::BufferData() {
 	glDeleteBuffers(MAX_BUFFER, bufferObject);
-	glDeleteBuffers(1, &gradientBufferObject);
 	glBindVertexArray(arrayObject);
 	glGenBuffers(1, &bufferObject[VERTEX_BUFFER]);
 	glBindBuffer(GL_ARRAY_BUFFER, bufferObject[VERTEX_BUFFER]);
@@ -172,21 +172,29 @@ void HeightMap::BufferData() {
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLuint),
 			indices, GL_STATIC_DRAW);
 	}
-	if (gradients) {
-		glGenBuffers(1, &gradientBufferObject);
-		glBindBuffer(GL_ARRAY_BUFFER, gradientBufferObject);
-		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector2),
-			gradients, GL_DYNAMIC_DRAW);
-		glVertexAttribPointer(6, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	if (water) {
+		glGenBuffers(1, &waterBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, waterBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(float),
+			water, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(6);
 	}
-	if (biomes) {
-		glGenBuffers(1, &biomeBufferObject);
-		glBindBuffer(GL_ARRAY_BUFFER, biomeBufferObject);
+	if (texturePct) {
+		glGenBuffers(1, &textureBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, textureBufferObject);
 		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector4),
-			biomes, GL_DYNAMIC_DRAW);
+			texturePct, GL_DYNAMIC_DRAW);
 		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 0, 0);
 		glEnableVertexAttribArray(7);
+	}
+	if (shadePct) {
+		glGenBuffers(1, &shadeBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, shadeBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(float),
+			shadePct, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(8);
 	}
 
 	glBindVertexArray(0);
