@@ -84,7 +84,7 @@ float Generator::perlin(int x, int y) {
 
 	value = lerp(ix0, ix1, sy);
 
- 	return m_minHeight + (value + 0.5) * (m_maxHeight - m_minHeight);
+ 	return m_minHeight + ((value + 1)/2) * (m_maxHeight - m_minHeight);
 }
 
 

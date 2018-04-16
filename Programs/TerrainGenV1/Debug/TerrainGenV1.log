@@ -1,13 +1,20 @@
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (TerrainGen.vcxproj, Tutorial 08 - Index Buffers.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  Renderer.cpp
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(19): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(74): warning C4156: deletion of an array expression without using the array form of 'delete'; array form substituted
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(74): warning C4154: deletion of an array expression; conversion to pointer supplied
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(268): warning C4244: 'argument': conversion from 'int' to 'const float', possible loss of data
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(165): warning C4101: 'offset': unreferenced local variable
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(310): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(311): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(312): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\renderer.cpp(317): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Generator.cpp
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(64): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(66): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(148): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(149): warning C4244: 'initializing': conversion from 'int' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(161): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(167): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(183): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(184): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(185): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(186): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(257): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(263): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(278): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(279): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(280): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\dominic\desktop\big folder of userfulness\uni\dissertation\project\programs\terraingenv1\generator.cpp(281): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.exe
   TerrainGenV1.vcxproj -> C:\Users\Dominic\Desktop\Big Folder of Userfulness\Uni\Dissertation\Project\Programs\Debug\TerrainGenV1.pdb (Partial PDB)

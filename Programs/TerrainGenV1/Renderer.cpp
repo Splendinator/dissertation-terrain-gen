@@ -109,7 +109,8 @@ void Renderer::UpdateScene(float msec) {
 	}
 
 	glUseProgram(currentShader->GetProgram());
-	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"),time);
+	glUniform1f(glGetUniformLocation(currentShader->GetProgram(), "time"), time);	//Send time to GPU
+	glUniform2f(glGetUniformLocation(currentShader->GetProgram(), "activeChunkCoords"), cameraPosX * RAW_WIDTH * HEIGHTMAP_X,cameraPosY * RAW_HEIGHT * HEIGHTMAP_Z); //Send world co-ordinates to GPU for use with water waves.
 
 	viewMatrix = camera->BuildViewMatrix();
 }
@@ -131,6 +132,9 @@ void Renderer::RenderScene() {
 
 	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
 		"sandTex"), 3);
+
+	glUniform1i(glGetUniformLocation(currentShader->GetProgram(),
+		"waterTex"), 4);
 
 	for (int i = 0; i < MAX_CHUNKS; i++) {
 		for (int j = 0; j < MAX_CHUNKS; j++) {
@@ -312,15 +316,16 @@ void Renderer::threadLoop(int id, unsigned long long c) {
 							Generator textureGenerator3(0, 0.1, 54);
 							BiomeMap worley = BiomeMap(200, 150);
 
-							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y =
-								worley.getWorley(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)
-									, 200, 1100, 300, 1);
+							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0;
+								//worley.getWorley(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)
+								//	, 200, 1100, 300, 1);
 							chunk[i * MAX_CHUNKS + j]->h->shadePct[x + RAW_WIDTH*y] = 
 								  textureGenerator.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1))
 								+ textureGenerator2.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1))
 								+ textureGenerator3.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1));
 
-							chunk[i * MAX_CHUNKS + j]->h->water[x + RAW_WIDTH*y] = 1.f;
+							chunk[i * MAX_CHUNKS + j]->h->water[x + RAW_WIDTH*y] = 0.f;
+							chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y] = Vector4(0, 1, 0, 0);
 						//Snowy Hills
 						/*		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y =									//Add together multiple noises.
 								  generator->simplex(y + (cameraPosX + i)*(RAW_WIDTH-1), x + (cameraPosY + j)*(RAW_HEIGHT-1))

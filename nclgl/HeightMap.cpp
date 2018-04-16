@@ -123,6 +123,10 @@ void HeightMap::Draw(){
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, textureSand);
 
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, textureWater);
+
+
 
 	glBindVertexArray(arrayObject);
 
@@ -236,5 +240,6 @@ void HeightMap::operator=(HeightMap &rhs) {
 	textureGrass = rhs.textureGrass;
 	textureRock = rhs.textureRock;
 	textureSand = rhs.textureSand;
+	textureWater = rhs.textureWater;
 }
 
