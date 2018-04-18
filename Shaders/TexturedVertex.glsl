@@ -24,7 +24,7 @@ out Vertex {
 } OUT;
 
 const float WAVE_FREQUENCY = 1600;
-const float WAVE_AMPLITUDE = 400;
+const float WAVE_AMPLITUDE = 160;
 const float WAVE_SPEED = 1400;
 
 
@@ -84,6 +84,10 @@ float lerp(float t1, float t2, float pct){
 }
 
 float perlin(float x, float y, float z){
+	x = abs(x);
+	y = abs(y);
+	z = abs(z);
+
 	int xi = int(x) & 255;      // Calculate the "unit cube" that the point asked will be located in
     int yi = int(y) & 255;      // The left bound is ( |_x_|,|_y_|,|_z_| ) and the right bound is that
     int zi = int(z) & 255;      // plus 1.  Next we calculate the location (from 0.0 to 1.0) in that cube.

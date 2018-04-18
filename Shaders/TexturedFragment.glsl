@@ -38,7 +38,7 @@ vec4 lerp(vec4 t1, vec4 t2, float pct){
 
 void main(void){
 	
-	if(IN.water > 0) { 
+	if(IN.water > 0.003) {		//small non-zero number keeps shore smooth 
 		gl_FragColor = texture(waterTex, IN.texCoord + vec2(time/WATER_SPEED,0));
 	}
 	else {

@@ -214,7 +214,7 @@ float Generator::simplex(int x, int y) {
 		// Add contributions from each corner to get the final noise value.
 		// The result is scaled to return values in the interval [-1,1].
 
-		return m_minHeight + m_maxHeight * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
+		return m_minHeight + m_maxHeight * 40.f * (n0 + n1 + n2); // TODO: The scale factor is preliminary!
 
 }
 

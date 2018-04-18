@@ -15,7 +15,7 @@ int main() {
 	Chunk *prev = NULL;
 	Chunk *active = NULL;
 
-	Window w("Index Buffers!", 1080,720,false);
+	Window w("Index Buffers!", 1600,900,false);
 	if(!w.HasInitialised()) {
 		return -1;
 	}

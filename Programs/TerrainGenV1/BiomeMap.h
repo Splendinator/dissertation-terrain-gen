@@ -3,7 +3,7 @@
 #include "../../nclgl/Vector2.h"
 
 enum Biome {
-	FIELD, HILLS, DESERT, MAX_BIOMES
+	FIELD, HILLS, DESERT, ISLAND, MAX_BIOMES
 };
 
 struct BiomePoint {
@@ -11,7 +11,8 @@ struct BiomePoint {
 	Biome biome;
 };
 
-const static int GRID_POINTS = 4;	//How many grid points around the player will be used for biome generation. Upping this will get better biome generation when combined with a higher variance but very slow.
+const static int GRID_POINTS = 2;	//How many grid points around the player will be used for biome generation. Upping this will get better biome generation when combined with a higher variance but very slow.
+const static int GRID_POINTS_WORLEY = 4;
 const float BORDER_LERP = 300;
 
 #pragma once

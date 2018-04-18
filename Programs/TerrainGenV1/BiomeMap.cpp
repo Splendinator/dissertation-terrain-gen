@@ -77,19 +77,21 @@ void BiomeMap::getBiome(float x, float y, float *results) {
 
 }
 
+float fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
+
 float BiomeMap::getWorley(float x, float y, float minHeight, float maxHeight, float dist, int n) {
 
 	x = abs(x);
 	y = abs(y);
 
-	float distance[GRID_POINTS * GRID_POINTS]; //Distance to each point.
+	float distance[GRID_POINTS_WORLEY * GRID_POINTS_WORLEY]; //Distance to each point.
 
 
 	//Generate all grid points, and get distances for each point
-	for (int i = 0; i < GRID_POINTS; i++) {
-		for (int j = 0; j < GRID_POINTS; j++) {
-			BiomePoint gridPoint = randomPoint(x - fmod(x, m_gridSize) + (m_gridSize * (i - (GRID_POINTS / 2 - 1))), y - fmod(y, m_gridSize) + (m_gridSize * (j - (GRID_POINTS / 2 - 1))));				//Generate the grid points.
-			distance[i*GRID_POINTS + j] = sqrt((gridPoint.loc.x - x) * (gridPoint.loc.x - x) + (gridPoint.loc.y - y) * (gridPoint.loc.y - y));					//Calculate distances to each grid point using pythagerous.
+	for (int i = 0; i < GRID_POINTS_WORLEY; i++) {
+		for (int j = 0; j < GRID_POINTS_WORLEY; j++) {
+			BiomePoint gridPoint = randomPoint(x - fmod(x, m_gridSize) + (m_gridSize * (i - (GRID_POINTS_WORLEY / 2 - 1))), y - fmod(y, m_gridSize) + (m_gridSize * (j - (GRID_POINTS_WORLEY / 2 - 1))));				//Generate the grid points.
+			distance[i*GRID_POINTS_WORLEY + j] = sqrt((gridPoint.loc.x - x) * (gridPoint.loc.x - x) + (gridPoint.loc.y - y) * (gridPoint.loc.y - y));					//Calculate distances to each grid point using pythagerous.
 			
 		}
 	}
@@ -103,7 +105,7 @@ float BiomeMap::getWorley(float x, float y, float minHeight, float maxHeight, fl
 		value[j] = dist;
 	}
 
-	for (int i = 0; i < (GRID_POINTS * GRID_POINTS); ++i) {
+	for (int i = 0; i < (GRID_POINTS_WORLEY * GRID_POINTS_WORLEY); ++i) {
 		//std::cout << distance[i] << " " << std::endl;
 		for (int j = 1; j < n+1; ++j) {
 			if (distance[i] <= value[j] && distance[i] >= value[j - 1]) {
@@ -116,7 +118,8 @@ float BiomeMap::getWorley(float x, float y, float minHeight, float maxHeight, fl
 		}
 	}
 	//std::cout << "P: " << value[0] << " " << value[1] << " " << value[2] << std::endl << std::endl;
-	float height = minHeight + value[n] / dist * (maxHeight - minHeight) ;
+	//float height = fade(value[n]/dist)
+	float height = minHeight + fade((value[n] / dist) * 2 - 0)/3 * (maxHeight - minHeight) ;
 	delete[] value;
 
 	return height;
