@@ -59,7 +59,7 @@ Renderer::Renderer(Window & parent) : OGLRenderer(parent) {
 }
 
 Renderer ::~Renderer(void) {
-	delete chunk;
+	delete[] chunk;
 	delete camera;
 }
 
@@ -279,231 +279,84 @@ void Renderer::setPointers() {
 }
 
 
+
 //TODO: Render in spiral pattern around player (so that closer chunks render first)
 void Renderer::threadLoop(int id, unsigned long long c) {
+	restartLoop:
 	while (true) {
 		for (int i = 0; i < MAX_CHUNKS; i++) {
 			for (int j = 0; j < MAX_CHUNKS; j++) {
 				if (!chunk[i * MAX_CHUNKS + j]->started && !flush)	//If a thread hasn't started work on chunk[i][j] yet...
 				{
-					chunk[i * MAX_CHUNKS + j]->started = true; //Signal that this thread has started
-					
+					chunk[i * MAX_CHUNKS + j]->started = id+1; //Signal that this thread has started work
+					int LoD = 1;	//Level of detail; *** VALID VALUES ARE {1,2,4,8,16,32,64,128} ***
 
+					//Edges; Must do all to ensure heightmaps seamlessly stitch together
+					//for (int x = 0; x < RAW_HEIGHT; x++) {
+					//	
+					//	if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
+					//	generateTerrain(i, j, 0, x);
+					//	generateTerrain(i, j, x, 0);
+					//	generateTerrain(i, j, RAW_HEIGHT-1, x);
+					//	generateTerrain(i, j, x, RAW_HEIGHT-1);
+					//
+					//}
+
+					//LoD Vertices                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            v
 					for (int x = 0; x < RAW_HEIGHT; x++) {
 						for (int y = 0; y < RAW_WIDTH; y++) {
-
-							if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
-
-
-							//Get rid of water
-							chunk[i * MAX_CHUNKS + j]->h->water[x + RAW_WIDTH*y] = 0;
-
-							float biomePct[MAX_BIOMES];
-							biomeMap.getBiome(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), biomePct);
-
-							biomePct[2] = biomePct[1] = biomePct[3] = 0;
-							biomePct[0] = 1;
-
-							float dx = 0, dy = 0;
-							float tx, ty;
+							if (flush || chunk[i * MAX_CHUNKS + j]->started != id+1) goto exitSafely; //Hard stop
 							
-							float perlinFilter = generator5.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1));
-
-							chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0;
-
-							//Texturing
-							chunk[i * MAX_CHUNKS + j]->h->shadePct[x + RAW_WIDTH*y] =
-								textureGenerator.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1))
-								+ textureGenerator2.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1))
-								+ textureGenerator3.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1));
-
-
-							//***ISLANDS***
-							if (biomePct[ISLAND] > 0) {
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (( 1050 -
-									worley.getWorley(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)
-										, 200, 1100, 400, 3)
-									+ generator.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1))
-									) - (1200 * perlinFilter)) * biomePct[ISLAND] ;
-
-
-
-								//underwater - Water gets rougher and darker the deeper it gets.
-								if (chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y < 0) {
-									if (biomePct[ISLAND] == 1) {
-										chunk[i * MAX_CHUNKS + j]->h->water[x + RAW_WIDTH*y] = min(1.0f, abs(chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y / 600));
-										chunk[i * MAX_CHUNKS + j]->h->shadePct[x + RAW_WIDTH*y] += min(0.2f, abs(chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y / (600 * 5)));// + 0.3f;
-									}
-									//chunk[i * MAX_CHUNKS + j]->h->shadePct[x + RAW_WIDTH*y] += 0.15f;
-									chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0;
-								}
-
-								//sand near the water. (Should really be mud in a swamp)
-								float sandVal = max(min((80.0f - chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y) / 30, 1), 0);
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y] = Vector4(1 - sandVal * biomePct[ISLAND], sandVal * biomePct[ISLAND], 0, 0);
-								chunk[i * MAX_CHUNKS + j]->h->shadePct[x + RAW_WIDTH*y] += 0.12f * (1 - sandVal);
-							}
-
-
-							//***HILLS***
-							if (biomePct[HILLS] > 0) {
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[HILLS] * generator2.simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty) * (perlinFilter*3-1.2));
-								dx += biomePct[HILLS] * tx * (perlinFilter * 3 - 1.2);
-								dy += biomePct[HILLS] * ty * (perlinFilter * 3 - 1.2);
-
-								float grad = sqrt(dx * dx + dy * dy); 
-								float gradMult;
-
-								//Snow texture
-								float snowVal = max(min((-25.f + chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y) / 300.f, 1), 0);
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y] = Vector4((1 - snowVal) * biomePct[HILLS], 0, (snowVal)* biomePct[HILLS], 0);
-
-								if (grad > 2) {
-									gradMult = min((grad - 2) / 10.0f, 1);
-									chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[HILLS] * generator3.simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty)) * gradMult;
-									dx += biomePct[HILLS] * tx * gradMult ;
-									dy += biomePct[HILLS] * ty * gradMult ;
-									grad = sqrt(dx * dx + dy * dy);
-								}
-
-								if (grad > 3) {
-									gradMult = min((grad - 3) / 15.0f, 1);
-									chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[HILLS] * generator4.simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty)) * gradMult;
-									dx += biomePct[HILLS] * tx * gradMult ;
-									dy += biomePct[HILLS] * ty * gradMult ;
-									grad = sqrt(dx * dx + dy * dy);
-								}
-								
-								gradMult = min((grad - 9) / 5.0f, 1);
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].x *= 1 - gradMult;
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].z *= 1 - gradMult;
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].w = gradMult;
-
-							}
-
-							//***DESERT***
-							if (biomePct[DESERT] > 0) {
-								
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y] = Vector4(0, biomePct[DESERT], 0, 0);
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[DESERT] * generator6.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[DESERT] * generator7.perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
-								
-								//Domain Warping - Sand dunes
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += 
-									(biomePct[DESERT] *
-										generator8.perlin(
-											generator8.perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) - 16), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 9) * 0.3f) * 1.1f,
-											generator8.perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) + 13), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) - 6) * 0.3f) * 1.1f
-										) * 5.f
-									);
-							}
-
-							//*** FIELD ***
-							if (biomePct[FIELD] > 0) {
-								chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y] = Vector4(biomePct[FIELD], 0, 0, 0);
-								chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[FIELD] * generator9.simplex(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
-								if (chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y > 300) {
-									float cliff = min(((300 - chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y) / 100), 1);
-									chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += cliff * 2000;
-								}
-							}
-
-							//Biomes
-							//	
-							//	float biomePct[MAX_BIOMES];
-							//	biomeMap.getBiome(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1) , biomePct);
-							//
-							//
-							//	float dx = 0, dy = 0;
-							//	float tx, ty;
-							//
-							//	chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y = 0;
-							//
-							//	//Field
-							//	if (biomePct[0] > 0) {
-							//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[0] * generator->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
-							//
-							//	}
-							//	
-							//	//Hills
-							//	if (biomePct[1] > 0) {
-							//
-							//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[1] * generator3->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty));
-							//		dx += biomePct[1] * tx;
-							//		dy += biomePct[1] * ty;
-							//
-							//		float grad = sqrt(dx * dx + dy * dy); //Gradient Magnitude
-							//		float gradMult;
-							//
-							//		if (grad > 3.0f) {
-							//			gradMult = min((grad - 3.0f) / 3.0f, 1);
-							//			//cout << grad << " " << gradMult << endl;
-							//			chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (gradMult * (biomePct[1] * generator2->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty)));
-							//			dx += gradMult * biomePct[1] * tx;
-							//			dy += gradMult * biomePct[1] * ty;
-							//		}
-							//
-							//		grad = sqrt(dx * dx + dy * dy); //Gradient Magnitude
-							//		
-							//		if (grad > 6.0f) {
-							//			gradMult = min((grad - 6.0f) / 4.0f, 1);
-							//			chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (gradMult * (biomePct[1] * generator4->simplexD(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1), &tx, &ty)));
-							//			dx += gradMult * biomePct[1] * tx;
-							//			dy += gradMult * biomePct[1] * ty;
-							//		}
-							//
-							//		chunk[i * MAX_CHUNKS + j]->h->gradients[x + RAW_WIDTH*y] = Vector2(dx, dy);
-							//	
-							//	}
-							//
-							//	//Desert
-							//	if (biomePct[2] > 0) {
-							//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[2] * generator5->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
-							//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += (biomePct[2] * generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1), x + (cameraPosY + j)*(RAW_HEIGHT - 1)));
-							//
-							//		//Domain Warping - Sand dunes
-							//		chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*y].y += 
-							//			(biomePct[2] *
-							//				generator6->perlin(
-							//					generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) - 1), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 6) * 0.15) * 1.1,
-							//					generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) + 9), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) - 2) * 0.15) * 1.1
-							//				) * 5
-							//			);
-							//	}
-
-
-
-
-
-								//3-layer domain warping	
-								//generator6->perlin(
-								//		generator6->perlin(
-								//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) + 7, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 2) * 3,
-								//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) - 5, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 1) * 3 
-								//		)																										    * 3,
-								//		generator6->perlin(
-								//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) - 5, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 3) * 3,
-								//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) + 2, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 0) * 3
-								//		)																											* 3
-								//	)																												* 5
-								//	;
-
-								//2-Layer domain warping
-								//	generator6->perlin(
-								//		generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) - 1), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 6) * 0.15) * 1.1 , 
-								//		generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) + 9), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) - 2) * 0.15) * 1.1
-								//	) * 5 + 400
-								//	;
-
-
+							generateTerrain(i, j, x, y);
+							chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].x = 1 - float(id)/4;
+							chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].y = 0;
+							chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].z = float(id)/4;
+							chunk[i * MAX_CHUNKS + j]->h->texturePct[x + RAW_WIDTH*y].w = 0;
 						}
-						if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
+						
 					}
 
-					if (flush || !chunk[i * MAX_CHUNKS + j]->started)	//Re-flag chunk for generation because it was halted half way through and is likely corrupt (Reliant on cameraPosY/cameraPosX not changing half way through).
+					
+
+					/// LEVEL OF DETAIL
+					////Adjascent vertices linearly interpolated
+					//for (int x = 0; x < (RAW_WIDTH-1); x += LoD) {
+					//	for (int y = LoD; y < (RAW_WIDTH - 1); y += LoD) {
+					//		for (int z = 1; z < LoD; z++) {
+					//			if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
+					//			lerpVert(chunk[i * MAX_CHUNKS + j], x + RAW_WIDTH*y, x + LoD + RAW_WIDTH*y, x + RAW_WIDTH*y + z,float(z)/LoD);
+					//			lerpVert(chunk[i * MAX_CHUNKS + j], y + RAW_WIDTH*x, y + RAW_WIDTH*(x + LoD), y + RAW_WIDTH*(x + z), float(z) / LoD);
+					//			//chunk[i * MAX_CHUNKS + j]->h->vertices[y + RAW_WIDTH*(x + z)].y =
+					//			//	chunk[i * MAX_CHUNKS + j]->h->vertices[y + RAW_WIDTH*x].y +
+					//			//	(float(z) / LoD) * (chunk[i * MAX_CHUNKS + j]->h->vertices[y + RAW_WIDTH*(x + LoD)].y - chunk[i * MAX_CHUNKS + j]->h->vertices[y + RAW_WIDTH*x].y);
+
+					//		}
+					//	}
+					//}
+
+					////Vertices linearly interpolated
+					//for (int x = 0; x < (RAW_WIDTH - 1); x += LoD) {
+					//	for (int y = 0; y < (RAW_WIDTH - 1); y += LoD) {
+					//		for (int z = 1; z < LoD; z++) {
+					//			for (int w = 1; w < LoD; w++) {
+					//				if (flush || !chunk[i * MAX_CHUNKS + j]->started) break;	//Hard stop
+					//				lerpVert(chunk[i * MAX_CHUNKS + j], x + RAW_WIDTH*(y + w), x + LoD + RAW_WIDTH*(y + w), (x + z) + RAW_WIDTH*(y + w), float(z) / LoD);
+					//				/*chunk[i * MAX_CHUNKS + j]->h->vertices[(x+z) + RAW_WIDTH*(y+w)].y =
+					//					chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*(y + w)].y +
+					//					(float(z) / LoD) * (chunk[i * MAX_CHUNKS + j]->h->vertices[x + LoD + RAW_WIDTH*(y + w)].y - chunk[i * MAX_CHUNKS + j]->h->vertices[x + RAW_WIDTH*(y + w)].y);*/
+					//			}
+					//		}
+					//	}
+					//}
+
+					if (flush || chunk[i * MAX_CHUNKS + j]->started != id + 1)	//Re-flag chunk for generation because it was halted half way through and is likely corrupt (Reliant on cameraPosY/cameraPosX not changing half way through).
 					{
-						chunk[i * MAX_CHUNKS + j]->started = false;
+					exitSafely:
+						if (chunk[i * MAX_CHUNKS + j]->started > 0) goto restartLoop;	//If this line is reached another thread started generating this chunk at the same time, so we just heed and let it finish.
+						chunk[i * MAX_CHUNKS + j]->started = 0;
 						chunk[i * MAX_CHUNKS + j]->finished = false;
+
+
 					}
 					else
 					{
@@ -513,4 +366,165 @@ void Renderer::threadLoop(int id, unsigned long long c) {
 			}
 		}
 	}
+}
+
+
+void Renderer::generateTerrain(int cX, int cY, int vX, int vY) {
+															
+	chunk[cX * MAX_CHUNKS + cY]->h->water[vX + RAW_WIDTH*vY] = 0; //Get rid of water
+
+	float biomePct[MAX_BIOMES];
+	biomeMap2.getBiome(vY + (cameraPosX + cX)*(RAW_WIDTH - 1) + generatorVoronoi.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1)),
+					   vX + (cameraPosY + cY)*(RAW_HEIGHT - 1) + generatorVoronoi.perlin(vX + (cameraPosY + cY)*(RAW_HEIGHT - 1), vY + (cameraPosX + cX)*(RAW_WIDTH - 1)),biomePct);
+
+	biomePct[1] = biomePct[2] = biomePct[0] = 0;
+	biomePct[3] = 1;
+
+	float dx = 0, dy = 0;
+	float tx, ty;
+
+	
+	//chunk[cX * MAX_CHUNKS + cY]->h->textureCoords[vX + RAW_WIDTH*vY].x += generatorTexCoords.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1));
+	//chunk[cX * MAX_CHUNKS + cY]->h->textureCoords[vX + RAW_WIDTH*vY].y += generatorTexCoords.perlin(vX + (cameraPosY + cY)*(RAW_HEIGHT - 1), vY + (cameraPosX + cX)*(RAW_WIDTH - 1));
+
+
+	float perlinFilter = generator5.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1));
+
+	//chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y = biomePct[1] * 500 + biomePct[2] * 1000 + biomePct[3] * 1500;
+
+	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y = 0;
+	//chunk[cX * MAX_CHUNKS + cY]->h->water[vX + RAW_WIDTH*vY] = 1.0f;
+
+	//chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y = temp.simplexD(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1),&dx,&dy);
+
+	//Shading
+	//chunk[cX * MAX_CHUNKS + cY]->h->shadePct[vX + RAW_WIDTH*vY] =
+	//	textureGenerator.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1))
+	//	+ textureGenerator2.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1))
+	//	+ textureGenerator3.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1));
+	
+
+	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY] = Vector4(biomePct[0], biomePct[1], biomePct[2], biomePct[3]);
+
+	//
+	//
+	////***ISLANDS***
+	//if (biomePct[ISLAND] > 0) {
+	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += ((1050 -
+	//		worley.getWorley(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1)
+	//			, 200, 1100, 400, 3)
+	//		+ generator.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1))
+	//		) - (1200 * perlinFilter)) * biomePct[ISLAND];
+	//
+	//
+	//
+	//	//underwater - Water gets rougher and darker the deeper it gets.
+	//	if (chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y < 0) {
+	//		if (biomePct[ISLAND] == 1) {
+	//			chunk[cX * MAX_CHUNKS + cY]->h->water[vX + RAW_WIDTH*vY] = min(1.0f, abs(chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y / 600));
+	//			chunk[cX * MAX_CHUNKS + cY]->h->shadePct[vX + RAW_WIDTH*vY] += min(0.2f, abs(chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y / (600 * 5)));// + 0.3f;
+	//		}
+	//		//chunk[cX * MAX_CHUNKS + cY]->h->shadePct[vX + RAW_WIDTH*vY] += 0.15f;
+	//		chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y = 0;
+	//	}
+	//
+	//	//sand near the water. (Should really be mud in a swamp)
+	//	float sandVal = max(min((80.0f - chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y) / 30, 1), 0);
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY] = Vector4(1 - sandVal * biomePct[ISLAND], sandVal * biomePct[ISLAND], 0, 0);
+	//	chunk[cX * MAX_CHUNKS + cY]->h->shadePct[vX + RAW_WIDTH*vY] += 0.12f * (1 - sandVal);
+	//}
+	//
+	//
+	////***HILLS***
+	//if (biomePct[HILLS] > 0) {
+	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += (biomePct[HILLS] * generator2.simplexD(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1), &tx, &ty) * (perlinFilter * 3 - 1.2));
+	//	dx += biomePct[HILLS] * tx * (perlinFilter * 3 - 1.2);
+	//	dy += biomePct[HILLS] * ty * (perlinFilter * 3 - 1.2);
+	//
+	//	float grad = sqrt(dx * dx + dy * dy);
+	//	float gradMult;
+	//
+	//	//Snow texture
+	//	float snowVal = max(min((-25.f + chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y) / 300.f, 1), 0);
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY] = Vector4((1 - snowVal) * biomePct[HILLS], 0, (snowVal)* biomePct[HILLS], 0);
+	//
+	//	if (grad > 2) {
+	//		gradMult = min((grad - 2) / 10.0f, 1);
+	//		chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += (biomePct[HILLS] * generator3.simplexD(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1), &tx, &ty)) * gradMult;
+	//		dx += biomePct[HILLS] * tx * gradMult;
+	//		dy += biomePct[HILLS] * ty * gradMult;
+	//		grad = sqrt(dx * dx + dy * dy);
+	//	}
+	//
+	//	if (grad > 3) {
+	//		gradMult = min((grad - 3) / 15.0f, 1);
+	//		chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += (biomePct[HILLS] * generator4.simplexD(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1), &tx, &ty)) * gradMult;
+	//		dx += biomePct[HILLS] * tx * gradMult;
+	//		dy += biomePct[HILLS] * ty * gradMult;
+	//		grad = sqrt(dx * dx + dy * dy);
+	//	}
+	//
+	//	gradMult = min((grad - 9) / 5.0f, 1);
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY].x *= 1 - gradMult;
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY].z *= 1 - gradMult;
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY].w = gradMult;
+	//
+	//}
+	//
+	////***DESERT***
+	//if (biomePct[DESERT] > 0) {
+	//
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY] = Vector4(0, biomePct[DESERT], 0, 0);
+	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += (biomePct[DESERT] * generator6.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1)));
+	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += (biomePct[DESERT] * generator7.perlin(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1)));
+	//
+	//	//Domain Warping - Sand dunes
+	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y +=
+	//		(biomePct[DESERT] *
+	//			generator8.perlin(
+	//				generator8.perlin((vY + (cameraPosX + cX)*(RAW_WIDTH - 1) - 16), (vX + (cameraPosY + cY)*(RAW_HEIGHT - 1) + 9) * 0.3f) * 1.1f,
+	//				generator8.perlin((vY + (cameraPosX + cX)*(RAW_WIDTH - 1) + 13), (vX + (cameraPosY + cY)*(RAW_HEIGHT - 1) - 6) * 0.3f) * 1.1f
+	//			) * 5.f
+	//			);
+	//}
+	//
+	////*** FIELD ***
+	//if (biomePct[FIELD] > 0) {
+	//	chunk[cX * MAX_CHUNKS + cY]->h->texturePct[vX + RAW_WIDTH*vY] = Vector4(biomePct[FIELD], 0, 0, 0);
+	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += (biomePct[FIELD] * generator9.simplex(vY + (cameraPosX + cX)*(RAW_WIDTH - 1), vX + (cameraPosY + cY)*(RAW_HEIGHT - 1)));
+	//	//if (chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y > 300) {
+	//	//	float cliff = min(((300 - chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y) / 100), 1);
+	//	//	chunk[cX * MAX_CHUNKS + cY]->h->vertices[vX + RAW_WIDTH*vY].y += cliff * 2000;
+	//	//}
+	//}
+
+	
+
+	//3-layer domain warping	
+	//generator6->perlin(
+	//		generator6->perlin(
+	//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) + 7, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 2) * 3,
+	//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) - 5, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 1) * 3 
+	//		)																										    * 3,
+	//		generator6->perlin(
+	//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) - 5, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 3) * 3,
+	//			generator6->perlin(y + (cameraPosX + i)*(RAW_WIDTH - 1) + 2, x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 0) * 3
+	//		)																											* 3
+	//	)																												* 5
+	//	;
+
+	//2-Layer domain warping
+	//	generator6->perlin(
+	//		generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) - 1), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) + 6) * 0.15) * 1.1 , 
+	//		generator6->perlin((y + (cameraPosX + i)*(RAW_WIDTH - 1) + 9), (x + (cameraPosY + j)*(RAW_HEIGHT - 1) - 2) * 0.15) * 1.1
+	//	) * 5 + 400
+	//	;
+}
+
+void Renderer::lerpVert(Chunk *c, int v1, int v2, int v3, float pct)
+{
+	c->h->vertices[v3].y =
+		c->h->vertices[v1].y +
+		pct * (c->h->vertices[v2].y - c->h->vertices[v1].y);
+
 }

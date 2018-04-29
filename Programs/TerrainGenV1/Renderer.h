@@ -11,7 +11,7 @@
 
 class Renderer : public OGLRenderer {
 private:
-	static const int MAX_CHUNKS = 9;	//The maximum ammount of chunks that will be rendered every frame. (3 means 3x3 grid around player)
+	static const int MAX_CHUNKS = 7;	//The maximum ammount of chunks that will be rendered every frame. (3 means 3x3 grid around player)
 	static const int MAX_THREADS = 4;	//The number of threads that we can use. More = faster terrain generation but more CPU usage.
 	int cameraPosX = MAX_CHUNKS / 2, cameraPosY = MAX_CHUNKS / 2; // Chunks that the camera is above.
 	
@@ -42,16 +42,27 @@ public :
 	 Generator generator6 = Generator(-200, 400, 700);	//noise for DESERT
 	 Generator generator7 = Generator(-150,0,250);		//noise for DESERT
 	 Generator generator8 = Generator(0, 1000, 400);	//noise for domain warping in DESERT
-	 Generator generator9 = Generator(-300, 900, 2800);	//noise for FIELD
+	 Generator generator9 = Generator(0, 900, 280);	//noise for FIELD
 
-	 Generator textureGenerator = Generator(0, 0.3, 87);
-	 Generator textureGenerator2 = Generator(0, 0.15, 200);
-	 Generator textureGenerator3 = Generator(0,0.15,54);
+	 Generator generatorVoronoi = Generator(-120, 120, 230);
+
+	 Generator generatorTexCoords = Generator(-0.5, 0.5, 300);
+
+	 Generator textureGenerator = Generator(0, 0.21, 800);
+	 Generator textureGenerator2 = Generator(0, 0.18, 240);
+	 Generator textureGenerator3 = Generator(0,0.15,14);
 
 	 BiomeMap worley = BiomeMap(200, 150);
 	 BiomeMap biomeMap = BiomeMap(3240,1320);
+	 BiomeMap biomeMap2 = BiomeMap(324, 132);
+
+	 Generator temp = Generator(200, 1200, 300);
+	 Generator heightTex = Generator(-300, 300, 200);
+	 Generator gradTex = Generator(-13, 13, 80);
 
 	 void shiftChunks(Direction dir);
 	 void setPointers();
 	 void threadLoop(int id, unsigned long long);
+	 void generateTerrain(int cX, int cY, int vX, int vY);	//Chunk X, Chunk Y, Verticie X, Verticie Y;
+	 void lerpVert(Chunk *c, int v1, int v2, int v3, float pct);	//Lineraly Interpolate texture, water, and height from v1 and v2 into v3
 };

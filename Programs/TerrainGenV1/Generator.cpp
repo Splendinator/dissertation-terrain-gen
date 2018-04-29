@@ -18,7 +18,7 @@ Generator::Generator(float minHeight, float maxHeight, float rockiness) {
 }
 
 
-float Generator::fade(float t) { return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
+float Generator::fade(float t) {return t * t * t * (t * (t * 6 - 15) + 10); }	// 6t5 - 15t4 + 10t3
 
 
 Generator::~Generator()
@@ -44,7 +44,7 @@ float Generator::dotGridGradient(int ix, int iy, float x, float y) {
 
 
 	//Generate heights for the points on the big grid.
-	srand((ix* 104723 + iy * 104729));
+	srand((((((((((ix * (iy + 1) * 7) & 480) >> 5) ^ 0b01101) + iy * (ix + 1) * 19) & 480) >> 5) * ((ix % 2047) + 1)) * ((iy % 2047) + 1)) ^ 0b01101001000110110110110101110101 % RAND_MAX);
 	float a = 0, b = 0;
 
 	(rand() % 2 ? (rand() % 2 ? a = 1 : a = -1) : (rand() % 2 ? b = 1 : b = -1));

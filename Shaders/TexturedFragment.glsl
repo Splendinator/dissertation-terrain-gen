@@ -49,9 +49,9 @@ void main(void){
 		
 		
 		gl_FragColor = texture(grassTex,IN.texCoord);
-		if(IN.texturePct.y > 0) gl_FragColor = lerp(gl_FragColor,sandTex,IN.texturePct.y / (IN.texturePct.x + IN.texturePct.y));
-		if(IN.texturePct.z > 0) gl_FragColor = lerp(gl_FragColor,snowTex,IN.texturePct.z / (IN.texturePct.x + IN.texturePct.y + IN.texturePct.z));
-		if(IN.texturePct.w > 0) gl_FragColor = lerp(gl_FragColor,rockTex,IN.texturePct.w / (IN.texturePct.x + IN.texturePct.y + IN.texturePct.z + IN.texturePct.w));
+		if(IN.texturePct.y > 0) gl_FragColor = lerp(gl_FragColor,sandTex,IN.texturePct.y / (IN.texturePct.x + IN.texturePct.y + 0.00001f));
+		if(IN.texturePct.z > 0) gl_FragColor = lerp(gl_FragColor,snowTex,IN.texturePct.z / (IN.texturePct.x + IN.texturePct.y + IN.texturePct.z + 0.00001f));
+		if(IN.texturePct.w > 0) gl_FragColor = lerp(gl_FragColor,rockTex,IN.texturePct.w / (IN.texturePct.x + IN.texturePct.y + IN.texturePct.z + IN.texturePct.w + 0.00001f));
 
 	}
 

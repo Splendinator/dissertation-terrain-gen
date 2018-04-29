@@ -28,7 +28,7 @@ Window::Window(std::string title, int sizeX, int sizeY, bool fullScreen)	{
 
 
 //This creates the console window
-	AllocConsole();
+	/*AllocConsole();
 
 	int consoleHandle;	
 	long stdHandle;
@@ -46,7 +46,7 @@ Window::Window(std::string title, int sizeX, int sizeY, bool fullScreen)	{
 	file		= _fdopen( consoleHandle, "r" );
 	*stdin = *file;
 	setvbuf( stdin, NULL, _IONBF, 0 );
-//
+//*/
 
 	WNDCLASSEX windowClass;
 	ZeroMemory(&windowClass, sizeof(WNDCLASSEX));

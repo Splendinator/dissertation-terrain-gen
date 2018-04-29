@@ -66,7 +66,7 @@ Chunk::Chunk(Vector2 pos) {
 
 Chunk::~Chunk()
 {
-	//cout << "Deleting Chunk" << endl;
+	delete h;
 }
 
 void Chunk::Draw() {

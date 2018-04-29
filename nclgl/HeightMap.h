@@ -12,8 +12,8 @@
 #define HEIGHTMAP_X 8.0f
 #define HEIGHTMAP_Z 8.0f
 #define HEIGHTMAP_Y 0.8f
-#define HEIGHTMAP_TEX_X 1.0f / 16.0f
-#define HEIGHTMAP_TEX_Z 1.0f / 16.0f
+#define HEIGHTMAP_TEX_X 1.0f / 64.0f
+#define HEIGHTMAP_TEX_Z 1.0f / 64.0f
 
 #define NUM_TEXTURES 2
 

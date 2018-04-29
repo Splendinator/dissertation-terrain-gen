@@ -14,7 +14,8 @@ BiomeMap::BiomeMap(int gridSize, int variance) {
 //Generates a random point given a grid location 
 BiomePoint BiomeMap::randomPoint(int x, int y) {
 	
-	srand((x * 104723 + y * 104729));
+	
+	srand((((((((((x * (y+1) * 7) & 480) >> 5) ^ 0b01101) + y * (x+1) * 19) & 480) >> 5) * ((x % 2047) + 1)) * ((y % 2047) + 1)) ^ 0b01101001000110110110110101110101 % RAND_MAX);
 	
 	BiomePoint b;
 	b.loc = Vector2(x - m_variance + (rand() % (2 * m_variance)), y - m_variance + (rand() % (2 * m_variance)));
