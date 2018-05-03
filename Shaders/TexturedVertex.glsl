@@ -140,7 +140,7 @@ void main(void) {
 	OUT.texturePct = texturePct;
 	OUT.shade = shade;
 	OUT.texCoord = (textureMatrix * vec4(texCoord, 0.0, 1.0)).xy;
-	
+
 	if (water > 0){
 		worldspace.y += perlin(
 				(worldspace.x + wc.x + activeChunkCoords.x) / WAVE_FREQUENCY,

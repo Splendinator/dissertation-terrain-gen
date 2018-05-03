@@ -34,6 +34,7 @@ int main() {
 	w.LockMouseToWindow(true);
 	w.ShowOSPointer(false);
 
+	cout << "Smallest time unit on this machine = " << chrono::high_resolution_clock::period::num << " / " << chrono::high_resolution_clock::period::den << " seconds." << endl;
 
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());
