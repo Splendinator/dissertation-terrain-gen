@@ -7,6 +7,9 @@ HeightMap::HeightMap() {
 	vertices = new Vector3[numVertices];
 	textureCoords = new Vector2[numVertices];
 	indices = new GLuint[numIndices];
+	shadePct = new float[numVertices];
+	water = new float[numVertices];
+	texturePct = new Vector4[numVertices];
 
 
 	for (int x = 0; x < RAW_WIDTH; ++x) {
@@ -114,6 +117,17 @@ void HeightMap::Draw(){
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, textureSnow);
 
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, textureRock);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, textureSand);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, textureWater);
+
+
+
 	glBindVertexArray(arrayObject);
 
 
@@ -127,6 +141,70 @@ void HeightMap::Draw(){
 	glBindVertexArray(0);
 
 }
+
+
+void HeightMap::BufferData() {
+	glDeleteBuffers(MAX_BUFFER, bufferObject);
+	glBindVertexArray(arrayObject);
+	glGenBuffers(1, &bufferObject[VERTEX_BUFFER]);
+	glBindBuffer(GL_ARRAY_BUFFER, bufferObject[VERTEX_BUFFER]);
+	glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector3),
+		vertices, GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(VERTEX_BUFFER, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(VERTEX_BUFFER);
+
+	if (textureCoords) { // This bit is new !
+		glGenBuffers(1, &bufferObject[TEXTURE_BUFFER]);
+		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[TEXTURE_BUFFER]);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector2),
+			textureCoords, GL_STATIC_DRAW);
+		glVertexAttribPointer(TEXTURE_BUFFER, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(TEXTURE_BUFFER);
+	}
+	if (colours) {
+		glGenBuffers(1, &bufferObject[COLOUR_BUFFER]);
+		glBindBuffer(GL_ARRAY_BUFFER, bufferObject[COLOUR_BUFFER]);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector4),
+			colours, GL_STATIC_DRAW);
+		glVertexAttribPointer(COLOUR_BUFFER, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(COLOUR_BUFFER);
+	}
+	if (indices) {
+		glGenBuffers(1, &bufferObject[INDEX_BUFFER]);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+			bufferObject[INDEX_BUFFER]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, numIndices * sizeof(GLuint),
+			indices, GL_STATIC_DRAW);
+	}
+	if (water) {
+		glGenBuffers(1, &waterBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, waterBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(float),
+			water, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(6, 1, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(6);
+	}
+	if (texturePct) {
+		glGenBuffers(1, &textureBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, textureBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vector4),
+			texturePct, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(7);
+	}
+	if (shadePct) {
+		glGenBuffers(1, &shadeBufferObject);
+		glBindBuffer(GL_ARRAY_BUFFER, shadeBufferObject);
+		glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(float),
+			shadePct, GL_DYNAMIC_DRAW);
+		glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(8);
+	}
+
+	glBindVertexArray(0);
+}
+
+
 
 void HeightMap::operator=(HeightMap &rhs) {
 	arrayObject = rhs.arrayObject;
@@ -160,5 +238,8 @@ void HeightMap::operator=(HeightMap &rhs) {
 	}
 	textureSnow = rhs.textureSnow;
 	textureGrass = rhs.textureGrass;
+	textureRock = rhs.textureRock;
 	textureSand = rhs.textureSand;
+	textureWater = rhs.textureWater;
 }
+

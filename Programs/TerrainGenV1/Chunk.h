@@ -21,7 +21,7 @@ public:
 	Chunk *n = NULL, *e = NULL, *s = NULL, *w = NULL;	//Pointers to the chunk to the north,east,south,west.
 	
 	// Used for multi-threading.
-	bool started = false;	//Has a thread started working on this chunk?
+	char started = 0;	//Has a thread started working on this chunk?
 	bool finished = false;   //Has a thread finished working on this chunk?
 	bool visible = false;	//Should this chunk be rendered?
 

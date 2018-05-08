@@ -15,7 +15,7 @@ int main() {
 	Chunk *prev = NULL;
 	Chunk *active = NULL;
 
-	Window w("Index Buffers!", 1080,720,false);
+	Window w("Index Buffers!", 1600,900,false);
 	if(!w.HasInitialised()) {
 		return -1;
 	}
@@ -34,6 +34,7 @@ int main() {
 	w.LockMouseToWindow(true);
 	w.ShowOSPointer(false);
 
+	cout << "Smallest time unit on this machine = " << chrono::high_resolution_clock::period::num << " / " << chrono::high_resolution_clock::period::den << " seconds." << endl;
 
 	while (w.UpdateWindow() && !Window::GetKeyboard()->KeyDown(KEYBOARD_ESCAPE)) {
 		renderer.UpdateScene(w.GetTimer()->GetTimedMS());

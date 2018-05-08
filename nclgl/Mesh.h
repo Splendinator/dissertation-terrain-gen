@@ -10,7 +10,7 @@ enum MeshBuffer {
 class Mesh {
 public:
 	Mesh(void);
-	~Mesh(void);
+	virtual ~Mesh(void);
 
 	virtual void Draw();
 	static Mesh * GenerateTriangle();
@@ -25,7 +25,7 @@ public:
 
 //protected:
 	void update();
-	void BufferData();
+	virtual void BufferData();
 	//void ClearData();
 
 	GLuint arrayObject;

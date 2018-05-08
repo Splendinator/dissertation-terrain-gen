@@ -23,7 +23,19 @@ Chunk::Chunk(Vector2 pos) {
 	h->textureSnow = SOIL_load_OGL_texture(
 		"../../Textures/Snow.jpg",
 		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+
+	h->textureRock = SOIL_load_OGL_texture(
+		"../../Textures/Rock.jpg",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
 	
+	h->textureSand = SOIL_load_OGL_texture(
+		"../../Textures/Sand.png",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+
+	h->textureWater = SOIL_load_OGL_texture(
+		"../../Textures/Water.jpg",
+		SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS);
+
 
 
 	
@@ -36,13 +48,25 @@ Chunk::Chunk(Vector2 pos) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
 
+	glBindTexture(GL_TEXTURE_2D, h->textureRock);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
+
+	glBindTexture(GL_TEXTURE_2D, h->textureSand);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
+
+	glBindTexture(GL_TEXTURE_2D, h->textureWater);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, true ? GL_REPEAT : GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, true ? GL_REPEAT : GL_CLAMP);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
 Chunk::~Chunk()
 {
-	//cout << "Deleting Chunk" << endl;
+	delete h;
 }
 
 void Chunk::Draw() {
